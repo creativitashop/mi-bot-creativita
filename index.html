@@ -26,13 +26,13 @@
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Escribe aquí...">
+        <input type="text" id="in" placeholder="Dime qué buscas hoy...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
-        let dPost = { nombre: "producto", precio: "precio de oferta" };
+        let dPost = { nombre: "el producto", precio: "precio de oferta" };
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -40,19 +40,19 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // ESCANEO AGRESIVO: Buscamos los datos sin importar los espacios raros de Blogger
-                const textoPlano = (e.data.info || "").replace(/\s+/g, ' ');
+                // LIMPIEZA AGRESIVA DE TEXTO
+                const raw = (e.data.info || "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ");
 
-                // 1. Extraer Precio (Busca el número que sigue a PRECIO_INDIVIDUAL)
-                const pMatch = textoPlano.match(/PRECIO_INDIVIDUAL:\s*([\d.]+)/i);
-                if(pMatch) dPost.precio = pMatch[1].trim();
+                // BÚSQUEDA DE PRECIO (Captura el primer número largo después de la palabra PRECIO)
+                const pMatch = raw.match(/PRECIO_INDIVIDUAL:\s*(\d+)/i);
+                if(pMatch) dPost.precio = pMatch[1];
 
-                // 2. Extraer Nombre (Lo que esté entre PRODUCTO_NOMBRE y PRECIO_INDIVIDUAL)
-                const nMatch = textoPlano.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|ID_LOGISTICO|$)/i);
+                // BÚSQUEDA DE NOMBRE
+                const nMatch = raw.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|ID_LOGISTICO|$)/i);
                 if(nMatch) dPost.nombre = nMatch[1].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio exacto y la información hoy?`, 'bot');
+                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio correcto?`, 'bot');
                 }
             }
         });
@@ -66,25 +66,17 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // RESPUESTA AL PRECIO (Prioridad absoluta a los datos capturados)
                 if (m.match(/precio|cuanto|valor|vale/)) {
-                    r = `¡Claro que sí! El <b>${dPost.nombre}</b> tiene un valor de promoción de **$${dPost.precio}** hoy mismo. 💰 Incluye envío GRATIS y pago contra-entrega. ¿Te gustaría que agendáramos tu pedido?`;
+                    r = `¡Claro que sí! El <b>${dPost.nombre}</b> tiene un valor de promoción de **$${dPost.precio}** hoy mismo. 💰 Incluye envío GRATIS y pago contra-entrega. ¿Te gustaría agendar tu pedido?`;
                 }
-                // RESPUESTA AL SALUDO
-                else if (m.match(/hola|buen|que tal/)) {
-                    r = `¡Hola! Muy buen día. 😊 Soy ${miAsesora.nombre}, aquí sigo atenta. ¿Te gustaría conocer los beneficios del <b>${dPost.nombre}</b> o prefieres confirmar el precio?`;
+                else if (m.match(/hola|buen|tarde/)) {
+                    r = `¡Hola! Muy buen día. 😊 ¿Te interesa conocer el precio y beneficios del <b>${dPost.nombre}</b>?`;
                 }
-                // PRODUCTO ESPECÍFICO
-                else if (m.includes("rtafull") || m.includes("colageno") || m.includes("rta full") || m.includes("coliplus") || m.includes("producto")) {
-                    r = `¡Excelente elección! El <b>${dPost.nombre}</b> es fundamental para tu bienestar. ✨ El precio hoy es de **$${dPost.precio}**. ¿Para qué ciudad sería el envío para validarte la cobertura?`;
-                }
-                // CIERRE
                 else {
-                    r = `Entiendo perfectamente. Mi meta es ayudarte a prevenir con el <b>${dPost.nombre}</b>. 🌿 ¿Deseas aprovechar el precio de **$${dPost.precio}** antes de que termine la promoción?`;
+                    r = `Como tu asesora, te recomiendo aprovechar el <b>${dPost.nombre}</b> por solo **$${dPost.precio}**. 🌿 ¿A qué ciudad sería el envío para confirmarte la entrega inmediata?`;
                 }
-
                 add(r, 'bot');
-            }, 700);
+            }, 600);
         }
 
         function add(t, c) {
