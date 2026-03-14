@@ -22,18 +22,17 @@
 <body>
     <div id="header">
         <img src="" id="avatar">
-        <div class="info"><h2 id="nom">Asesora Experta</h2><span style="color:#28a745; font-size:11px; font-weight:bold;">● En línea</span></div>
+        <div class="info"><h2 id="nom">Asesora</h2><span style="color:#28a745; font-size:11px; font-weight:bold;">● En línea</span></div>
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="¿En qué puedo ayudarte hoy?">
+        <input type="text" id="in" placeholder="Dime qué producto buscas...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
-        let dPost = { id: "", nombre: "", precio: "" };
-        let paso = 0;
+        let dPost = { nombre: "", precio: "" };
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -41,13 +40,13 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // CAPTURA DE DATOS REALES DEL BLOG
+                // Captura de datos REALES del post del blog
                 const raw = e.data.info || "";
                 if(raw.includes("PRODUCTO_NOMBRE:")) dPost.nombre = raw.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
                 if(raw.includes("PRECIO_INDIVIDUAL:")) dPost.precio = raw.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>, experta en salud preventiva y belleza. Es un gusto saludarte. ¿En qué producto estás interesado el día de hoy para darte toda la información?`, 'bot');
+                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. Es un gusto saludarte. ¿En qué producto estás interesado el día de hoy para darte toda la información y el precio de promoción?`, 'bot');
                 }
             }
         });
@@ -61,29 +60,21 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // RESPUESTA SI SALUDAN DE NUEVO
-                if (m.match(/hola|buen|que tal/)) {
-                    r = `¡Hola de nuevo! 😊 Aquí sigo atenta para asesorarte. ¿Te interesa conocer más sobre el <b>${dPost.nombre}</b> o buscas algún otro beneficio para tu salud?`;
+                // RESPUESTA AL PRODUCTO (TRAE EL NOMBRE Y PRECIO CORRECTO DEL BLOG)
+                if (m.includes("rtafull") || m.includes("colageno") || m.includes("rta full") || (dPost.nombre && m.includes(dPost.nombre.toLowerCase()))) {
+                    r = `¡Excelente elección! El <b>${dPost.nombre || "producto del post"}</b> es fundamental para tu salud preventiva. 🌿 Actualmente lo tenemos en promoción por solo **$${dPost.precio || "valor de oferta"}**. ¿Te gustaría conocer los beneficios o prefieres que agendemos tu envío de una vez?`;
                 }
-                // RESPUESTA AL PRODUCTO ESPECÍFICO (TRAE VALORES CORRECTOS)
-                else if (m.includes("rtafull") || m.includes("colageno") || m.includes("rta full") || m.includes(dPost.nombre.toLowerCase())) {
-                    r = `¡Excelente elección! El <b>${dPost.nombre}</b> es clave en la salud preventiva. 🌿 Actualmente lo tenemos en promoción por solo **$${dPost.precio}**. ¿Te gustaría conocer sus beneficios principales o prefieres agendar el envío de una vez?`;
+                // RESPUESTA A SALUDOS
+                else if (m.match(/hola|buen|que tal|saludos/)) {
+                    r = `¡Hola! Muy buen día. 😊 Soy ${miAsesora.nombre}, aquí sigo atenta. ¿Qué producto del catálogo te interesa llevar hoy?`;
                 }
                 // PRECIO
                 else if (m.match(/precio|cuanto|valor|costo/)) {
-                    r = `Claro que sí, el valor del <b>${dPost.nombre}</b> es de **$${dPost.precio}** con envío gratis. 💰 ¿A qué ciudad te gustaría que lo enviáramos?`;
+                    r = `Claro que sí, el valor del <b>${dPost.nombre || "producto"}</b> es de **$${dPost.precio || "valor de oferta"}** con envío GRATIS. 💰 ¿A qué ciudad iría tu pedido?`;
                 }
-                // CIUDAD
-                else if (m.match(/bogota|medellin|cali|pereira|barranquilla|envio/)) {
-                    r = `¡Súper! Tenemos cobertura total allá con pago contra-entrega. 🚚 Para procesar tu pedido del <b>${dPost.nombre}</b>, ¿me confirmas tu nombre y dirección completa?`;
-                }
-                // OTROS PRODUCTOS
-                else if (m.includes("otro") || m.includes("portafolio")) {
-                    r = "¡Nuestro portafolio es muy extenso! Manejamos diversas soluciones de salud y belleza. 💄 Cuéntame qué necesidad tienes y con gusto te doy la información exacta.";
-                }
-                // DEFAULT PERSUASIVO SIN NOMBRES GENÉRICOS
+                // CIERRE PERSUASIVO POR DEFECTO
                 else {
-                    r = `Como experta, te confirmo que el <b>${dPost.nombre}</b> es la mejor inversión para prevenir antes que curar. ✨ ¿Deseas aprovechar el precio de **$${dPost.precio}** antes de que termine la promoción?`;
+                    r = `Como tu asesora experta, te confirmo que el <b>${dPost.nombre || "producto"}</b> es la mejor opción para prevenir antes que curar. ✨ ¿Deseas aprovechar el precio de **$${dPost.precio || "promoción"}** antes de que se agote el inventario?`;
                 }
 
                 add(r, 'bot');
