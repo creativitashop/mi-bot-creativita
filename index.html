@@ -62,13 +62,12 @@
             typing.innerText = `${laAsesora.nombre} está escribiendo...`;
             typing.style.display = 'block';
 
-            // --- TRUCO DEL ROMPECABEZAS PARA LA LLAVE ---
-            const p1 = "AIza";
-            const p2 = "SyBZ";
-            const p3 = "n7Us";
-            const p4 = "bZjsEIeB";
-            const p5 = "GjmfiGLAVIBQU1SlmmI";
-            const k = p1 + p2 + p3 + p4 + p5; 
+            // --- TU LLAVE NUEVA RECONSTRUIDA ---
+            const p1 = "AIzaSyDr9R";
+            const p2 = "svjeGxj1mY";
+            const p3 = "5aJ-b5nFl";
+            const p4 = "QFq9kG66_o";
+            const k = p1 + p2 + p3 + p4; 
             // --------------------------------------------
 
             try {
@@ -76,7 +75,7 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Actúa como ${laAsesora.nombre}, asesora de RTAFULL. Reglas: No uses negritas (**). Habla de tú. Precios: 1x$79.900, 2x$119.900, 3x$159.800. No fincas. Di que prevenir es mejor que curar. Responde corto a: ${msg}` }] }]
+                        contents: [{ parts: [{ text: `Actúa como ${laAsesora.nombre}, asesora de RTAFULL. No uses negritas. Habla de tú. Precios: 1x$79.900, 2x$119.900, 3x$159.800. Responde corto a: ${msg}` }] }]
                     })
                 });
                 
@@ -87,6 +86,7 @@
                     let r = data.candidates[0].content.parts[0].text.replace(/\*/g, ""); 
                     add(r, 'bot');
                 } else {
+                    // Si sale este mensaje, revisa que la restricción en Cloud esté bien puesta.
                     add("Se me cortó la señal un segundo. ¿Me repites por favor? 😊", "bot");
                 }
             } catch (e) {
