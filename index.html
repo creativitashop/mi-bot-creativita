@@ -32,31 +32,29 @@
             add(texto, 'user');
             input.value = '';
 
-            // LLAVE NUEVA DIVIDIDA (De tu imagen image_2323dd.png)
+            // Usamos tu llave vigente de la imagen image_2323dd
             const p1 = "hf_yajxyoQZrASiLVX"; 
             const p2 = "rNTARGUhxmvuwKbpji"; 
 
             try {
-                // Usamos DialoGPT de Microsoft (Muy rápido y estable)
-                const response = await fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
+                const response = await fetch("https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct", {
                     method: "POST",
                     headers: { "Authorization": "Bearer " + p1 + p2, "Content-Type": "application/json" },
-                    body: JSON.stringify({ inputs: texto })
+                    body: JSON.stringify({ inputs: "Responde como Dayana, vendedora amable: " + texto })
                 });
                 
                 const data = await response.json();
                 
-                if (data.generated_text) {
-                    add(data.generated_text, 'bot');
-                } else if (Array.isArray(data) && data[0].generated_text) {
-                    add(data[0].generated_text, 'bot');
+                if (Array.isArray(data) && data[0].generated_text) {
+                    let r = data[0].generated_text.replace(/.* amable:/i, '').trim();
+                    add(r, 'bot');
                 } else if (data.error && data.error.includes("loading")) {
-                    add("Estoy despertando mis sistemas. Dame 15 segundos y dime 'Hola' de nuevo. 😊", 'bot');
+                    add("Estoy despertando mis sistemas. Dame 20 segundos y vuelve a decir 'Hola'. 😊", 'bot');
                 } else {
-                    add("¡Recibido! ¿Para qué ciudad sería el envío? 😊", 'bot');
+                    add("¡Hola! Con gusto te ayudo. ¿Para qué ciudad es el envío? 😊", 'bot');
                 }
             } catch (e) {
-                add("Estamos teniendo mucha demanda. Por favor, intenta de nuevo en un momento. 😊", 'bot');
+                add("El servidor está tardando un poco. Intenta de nuevo en 10 segundos. 😊", 'bot');
             }
         }
 
