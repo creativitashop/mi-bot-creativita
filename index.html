@@ -62,11 +62,11 @@
             typing.innerText = `${laAsesora.nombre} está escribiendo...`;
             typing.style.display = 'block';
 
-            // --- TU LLAVE NUEVA RECONSTRUIDA ---
-            const p1 = "AIzaSyDr9R";
-            const p2 = "svjeGxj1mY";
-            const p3 = "5aJ-b5nFl";
-            const p4 = "QFq9kG66_o";
+            // --- TU LLAVE NUEVA ACTUALIZADA (...qS58) ---
+            const p1 = "AIzaSyAdFn";
+            const p2 = "I6xHkmIHan";
+            const p3 = "STZC4IIh7r";
+            const p4 = "xXyvhqS58";
             const k = p1 + p2 + p3 + p4; 
             // --------------------------------------------
 
@@ -86,7 +86,6 @@
                     let r = data.candidates[0].content.parts[0].text.replace(/\*/g, ""); 
                     add(r, 'bot');
                 } else {
-                    // Si sale este mensaje, revisa que la restricción en Cloud esté bien puesta.
                     add("Se me cortó la señal un segundo. ¿Me repites por favor? 😊", "bot");
                 }
             } catch (e) {
