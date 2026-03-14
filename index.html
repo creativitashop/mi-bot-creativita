@@ -32,7 +32,7 @@
 
     <script>
         let miAsesora = {}; 
-        let dPost = { nombre: "producto", precio: "0" };
+        let dPost = { nombre: "producto", precio: "precio de oferta" };
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -40,19 +40,19 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // LIMPIEZA TOTAL DE CARACTERES OCULTOS DEL BLOG
-                let raw = e.data.info || "";
-                // Reemplazamos espacios especiales y saltos por espacios simples
-                raw = raw.replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]/g, " ");
-                
-                const matchNombre = raw.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|ID_LOGISTICO|$)/i);
-                const matchPrecio = raw.match(/PRECIO_INDIVIDUAL:\s*(\d+[\d.]*)/i);
+                // ESCANEO AGRESIVO: Buscamos los datos sin importar los espacios raros de Blogger
+                const textoPlano = (e.data.info || "").replace(/\s+/g, ' ');
 
-                if(matchNombre) dPost.nombre = matchNombre[1].trim();
-                if(matchPrecio) dPost.precio = matchPrecio[1].trim();
+                // 1. Extraer Precio (Busca el número que sigue a PRECIO_INDIVIDUAL)
+                const pMatch = textoPlano.match(/PRECIO_INDIVIDUAL:\s*([\d.]+)/i);
+                if(pMatch) dPost.precio = pMatch[1].trim();
+
+                // 2. Extraer Nombre (Lo que esté entre PRODUCTO_NOMBRE y PRECIO_INDIVIDUAL)
+                const nMatch = textoPlano.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|ID_LOGISTICO|$)/i);
+                if(nMatch) dPost.nombre = nMatch[1].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio correcto?`, 'bot');
+                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio exacto y la información hoy?`, 'bot');
                 }
             }
         });
@@ -65,26 +65,26 @@
             setTimeout(() => {
                 const m = val.toLowerCase();
                 let r = "";
-                
-                // USAR SIEMPRE EL VALOR CAPTURADO
-                const nom = dPost.nombre;
-                const pre = dPost.precio === "0" ? "en oferta" : dPost.precio;
 
-                if (m.match(/hola|buen/)) {
-                    r = `¡Hola! Muy buen día. 😊 ¿Te interesa el <b>${nom}</b> o buscas otro producto?`;
+                // RESPUESTA AL PRECIO (Prioridad absoluta a los datos capturados)
+                if (m.match(/precio|cuanto|valor|vale/)) {
+                    r = `¡Claro que sí! El <b>${dPost.nombre}</b> tiene un valor de promoción de **$${dPost.precio}** hoy mismo. 💰 Incluye envío GRATIS y pago contra-entrega. ¿Te gustaría que agendáramos tu pedido?`;
                 }
-                else if (m.match(/precio|cuanto|valor|vale/)) {
-                    r = `Claro que sí. El <b>${nom}</b> tiene un valor de **$${pre}** hoy mismo. 💰 Incluye envío gratis y pago contra-entrega. ¿Te gustaría que tomara tus datos?`;
+                // RESPUESTA AL SALUDO
+                else if (m.match(/hola|buen|que tal/)) {
+                    r = `¡Hola! Muy buen día. 😊 Soy ${miAsesora.nombre}, aquí sigo atenta. ¿Te gustaría conocer los beneficios del <b>${dPost.nombre}</b> o prefieres confirmar el precio?`;
                 }
-                else if (m.match(/rtafull|colageno|coliaplus|coliplus|producto/)) {
-                    r = `¡Excelente! El <b>${nom}</b> es de lo más pedido por su efectividad. ✨ El precio es de **$${pre}**. ¿A qué ciudad sería el envío?`;
+                // PRODUCTO ESPECÍFICO
+                else if (m.includes("rtafull") || m.includes("colageno") || m.includes("rta full") || m.includes("coliplus") || m.includes("producto")) {
+                    r = `¡Excelente elección! El <b>${dPost.nombre}</b> es fundamental para tu bienestar. ✨ El precio hoy es de **$${dPost.precio}**. ¿Para qué ciudad sería el envío para validarte la cobertura?`;
                 }
+                // CIERRE
                 else {
-                    r = `Como tu asesora, te confirmo que el <b>${nom}</b> por **$${pre}** es la mejor inversión para tu salud hoy. 🌿 ¿Deseas aprovechar la promoción?`;
+                    r = `Entiendo perfectamente. Mi meta es ayudarte a prevenir con el <b>${dPost.nombre}</b>. 🌿 ¿Deseas aprovechar el precio de **$${dPost.precio}** antes de que termine la promoción?`;
                 }
 
                 add(r, 'bot');
-            }, 600);
+            }, 700);
         }
 
         function add(t, c) {
@@ -92,6 +92,7 @@
             const chat = document.getElementById('chat'); chat.appendChild(d);
             chat.scrollTop = chat.scrollHeight;
         }
+        document.getElementById('in').onkeypress = (e) => { if(e.key === 'Enter') send(); };
     </script>
 </body>
 </html>
