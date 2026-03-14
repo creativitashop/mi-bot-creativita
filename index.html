@@ -5,29 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistente RTAFULL</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background-color: #f4f1ea; display: flex; flex-direction: column; height: 100vh; }
-        #header { background: #D4AF37; color: white; padding: 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        #perfil-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; background-color: #eee; object-fit: cover; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f4f1ea; display: flex; flex-direction: column; height: 100vh; }
+        #header { background: #D4AF37; color: white; padding: 12px; display: flex; align-items: center; gap: 10px; }
+        #perfil-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; }
-        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #e0e0e0; color: #333; }
-        .user { background: #D4AF37; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        #typing { font-size: 12px; color: #888; margin: 0 20px 15px; display: none; font-style: italic; }
+        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; }
+        .bot { background: white; align-self: flex-start; border: 1px solid #e0e0e0; }
+        .user { background: #D4AF37; color: white; align-self: flex-end; }
         #input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eee; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
-        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div id="header">
         <img id="perfil-img" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp" alt="Dayana">
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-weight: bold;">Dayana</span>
-            <span style="font-size: 11px;">● En línea ahora</span>
-        </div>
+        <div><b>Dayana</b><br><small>En línea</small></div>
     </div>
-    <div id="chat"><div class="msg bot">¡Buen día! Un gusto saludarte, soy Dayana. 😊<br><br>¿A qué ciudad va tu pedido?</div></div>
-    <div id="typing">Dayana está escribiendo...</div>
+    <div id="chat"><div class="msg bot">¡Hola! Soy Dayana. 😊 ¿A qué ciudad va tu pedido?</div></div>
     <div id="input-area">
         <input type="text" id="prompt" placeholder="Escribe aquí...">
         <button onclick="enviar()">🚀</button>
@@ -41,31 +36,29 @@
             
             add(msg, 'user');
             input.value = '';
-            document.getElementById('typing').style.display = 'block';
 
             const k = "AIzaSyAdFnI6xHkmIHanSTZC4IIh7rxXyvhqS58";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
 
             try {
-                // AQUÍ ESTÁ EL CAMBIO CLAVE: LOS DOS PUNTOS (:) ANTES DE generateContent
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, {
+                const response = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Actúa como Dayana de RTAFULL. Responde corto y sin negritas a: ${msg}. Precios: 1x79.900, 2x119.900.` }] }]
+                        contents: [{ parts: [{ text: "Eres Dayana, asesora de ventas. Responde amable y corto a esto: " + msg }] }]
                     })
                 });
                 
                 const data = await response.json();
-                document.getElementById('typing').style.display = 'none';
                 
-                if (data.candidates) {
+                if (data.candidates && data.candidates[0].content) {
                     add(data.candidates[0].content.parts[0].text, 'bot');
                 } else {
-                    add("Dime de nuevo, por favor. 😊", "bot");
+                    console.log("Error detallado:", data);
+                    add("Lo siento, ¿me repites?", "bot");
                 }
             } catch (e) {
-                document.getElementById('typing').style.display = 'none';
-                add("Hubo un error de conexión.", "bot");
+                add("Error de conexión.", "bot");
             }
         }
 
@@ -77,6 +70,7 @@
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
         }
+        document.getElementById('prompt').addEventListener('keypress', (e) => { if (e.key === 'Enter') enviar(); });
     </script>
 </body>
 </html>
