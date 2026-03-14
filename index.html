@@ -26,13 +26,19 @@
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Dime qué buscas hoy...">
+        <input type="text" id="in" placeholder="Escribe tu mensaje...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
-        let dPost = { nombre: "el producto", precio: "precio de oferta" };
+        // VALORES POR DEFECTO PARA QUE NUNCA FALLE
+        let dPost = { 
+            nombre: "Colágeno Hidrolizado", 
+            precio: "85.000",
+            rtafull: "79.900", // Puedes ajustar estos valores manualmente aquí
+            tyruss: "95.000"
+        };
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -40,19 +46,16 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // LIMPIEZA AGRESIVA DE TEXTO
-                const raw = (e.data.info || "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ");
-
-                // BÚSQUEDA DE PRECIO (Captura el primer número largo después de la palabra PRECIO)
+                // Intento de captura del blog (si existe el código oculto)
+                const raw = (e.data.info || "").replace(/\s+/g, " ");
                 const pMatch = raw.match(/PRECIO_INDIVIDUAL:\s*(\d+)/i);
+                const nMatch = raw.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|$)/i);
+                
                 if(pMatch) dPost.precio = pMatch[1];
-
-                // BÚSQUEDA DE NOMBRE
-                const nMatch = raw.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|ID_LOGISTICO|$)/i);
                 if(nMatch) dPost.nombre = nMatch[1].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio correcto?`, 'bot');
+                    add(`¡Hola! 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado hoy para darte el precio de promoción?`, 'bot');
                 }
             }
         });
@@ -65,15 +68,15 @@
             setTimeout(() => {
                 const m = val.toLowerCase();
                 let r = "";
-
-                if (m.match(/precio|cuanto|valor|vale/)) {
-                    r = `¡Claro que sí! El <b>${dPost.nombre}</b> tiene un valor de promoción de **$${dPost.precio}** hoy mismo. 💰 Incluye envío GRATIS y pago contra-entrega. ¿Te gustaría agendar tu pedido?`;
-                }
-                else if (m.match(/hola|buen|tarde/)) {
-                    r = `¡Hola! Muy buen día. 😊 ¿Te interesa conocer el precio y beneficios del <b>${dPost.nombre}</b>?`;
-                }
-                else {
-                    r = `Como tu asesora, te recomiendo aprovechar el <b>${dPost.nombre}</b> por solo **$${dPost.precio}**. 🌿 ¿A qué ciudad sería el envío para confirmarte la entrega inmediata?`;
+                
+                if (m.includes("rtafull")) {
+                    r = `¡El <b>Rtafull</b> es excelente! 🌿 El precio de hoy es de **$${dPost.rtafull}** con envío gratis. ¿Te gustaría agendarlo?`;
+                } else if (m.includes("tyruss")) {
+                    r = `El <b>Tyruss Full</b> está en promoción por **$${dPost.tyruss}**. 💰 ¡Es de los más efectivos! ¿Para qué ciudad sería el envío?`;
+                } else if (m.includes("colageno") || m.includes("precio") || m.includes("cuanto")) {
+                    r = `Claro que sí. El <b>${dPost.nombre}</b> tiene un valor de **$${dPost.precio}** hoy. 🎁 Incluye envío gratis y pago contra-entrega. ¿Te tomo los datos?`;
+                } else {
+                    r = `Como tu asesora, estoy aquí para ayudarte. ¿Deseas el precio del <b>${dPost.nombre}</b> o del <b>Rtafull</b>? ✨`;
                 }
                 add(r, 'bot');
             }, 600);
