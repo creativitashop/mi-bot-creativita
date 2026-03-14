@@ -11,15 +11,13 @@
         #nombre-asesora { font-weight: bold; font-size: 16px; }
         #estado { font-size: 11px; opacity: 0.9; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #e0e0e0; color: #333; box-shadow: 2px 2px 5px rgba(0,0,0,0.02); }
+        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; }
+        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #e0e0e0; color: #333; }
         .user { background: #D4AF37; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         #typing { font-size: 12px; color: #888; margin: 0 20px 10px; display: none; font-style: italic; }
         #input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eee; }
-        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; font-size: 14px; }
-        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; font-size: 20px; transition: 0.2s; }
-        button:hover { background: #b8962d; transform: scale(1.05); }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
+        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -40,53 +38,67 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE ASESORAS ALEATORIAS
         const asesoras = [
             { nombre: "Dayana", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp" },
             { nombre: "Isabella", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4EJO6iV4Z-Itf2sYYwuqldfLYxibew0bjGGlCatlNCAdjLQvWU7RY4RWVkV8QybdiAmqGb829UIE56Zir7sj7lvafx8v09VoSS9sU5XLHh6lvzBKmBokxtngaYIMxFAn0U3V4ZM23rZZsyKYwKM8nA7_ZVYMJ9AEqc8dowQUzE78mM8Rhr2klWIdISk5y/s1600/StockCake-Friendly-Call-Center_1723420268.webp" },
-            { nombre: "Carolina", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiqDDq9ZB6967dWethT8kzi04kdlhpZ7_fGE5kKn9ATOIKUVqU13aklhLkVnO_HiJwSyuxIOvp-DWHj1xbUKJzsewX0UDroC6eQ6JhYxkzlcXTxY1JATiTfMdLznAXrl8GEqvyCimGSGY9WGjRgEqIimkX2V120Yti0cqoJ8Fn7cn12j0C6hMIofPdtg95c/s1600/callCenter.jpg" },
-            { nombre: "Valentina", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjdjwIeoO7YnjtpkXiXxFKUiSy8ssQGvsD85vXebU4buDEXgWV0_6LwQzXAO2172qBVamwBLKczRRWpP4MJOGFm6ImQ7WMVK0ghkQZNupB-__Upf3e0j2FInTxeGOs7cZfGgGnBH5WeQ0tVOQOfZrxXMJKpeT4bXz8VHjKEsWQ6MAQJspN43SU_fw54uo7N/s1600/telemarketing_002.jpg" },
+            { nombre: "Carolina", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiqDDq9ZB6967dWethT8kzi04kdlhpZ7_fGE5kKn9ATOIKUVqU13aklhLkVnO_HiJwSyuxIOvp-DWHj1xbUKJzsewX0UDroC6eQ6JhYxkzlcXTxY1JATiTfMdLznAXrl8GEqvyCimGSGS9WGjRgEqIimkX2V120Yti0cqoJ8Fn7cn12j0C6hMIofPdtg95c/s1600/callCenter.jpg" },
+            { nombre: "Valentina", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjdjwIeoO7YnjtpkXiXxFKUiSy8ssQGvsD85vXebU4buDEXgWV0_6LwQzXAO2172qBVamwBLKczRRWpP4MJOGFm6ImQ7WMVK0ghkQZNupB-__Upf3e0j2FInTxeGOs7cZfGgGnBH5WeQ0tVOOfZrxXMJKpeT4bXz8VHjKEsWQ6MAQJspN43SU_fw54uo7N/s1600/telemarketing_002.jpg" },
             { nombre: "Camila", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjj8UIYW0ose63ONacNpqFaV35lkGDDm-PYj_kWP7D_RIoxFUAe2bLr0d9L3lB-I9LDYFl6TmyrRMu557lQXWM-DU329joWK73qKPeS9kUmmBbXv8hUhETNKVBZG7HHALhOs_8AIj9zKj8tr6UZl7FvF18jr-jCF-XSN-GuZGSR1YFtQuzBhKB068YXv3o8/s1600/que-es-una-diadema-inalambrica.jpg" }
         ];
 
-        // Selección aleatoria al iniciar
         const laAsesora = asesoras[Math.floor(Math.random() * asesoras.length)];
         document.getElementById('nombre-asesora').innerText = laAsesora.nombre;
         document.getElementById('perfil-img').src = laAsesora.foto;
-        document.getElementById('bienvenida').innerHTML = `¡Hola! Un gusto saludarte, soy <b>${laAsesora.nombre}</b>. 😊 <br><br>Cuéntame, ¿cómo te sientes hoy? Estoy aquí para asesorarte con lo mejor para tu bienestar.`;
+        document.getElementById('bienvenida').innerHTML = `¡Hola! Un gusto saludarte, soy ${laAsesora.nombre}. 😊 <br><br>Cuéntame, ¿cómo te sientes hoy? Estamos aquí para asesorarte con lo mejor para tu bienestar.`;
 
         async function enviar() {
             const input = document.getElementById('prompt');
             const msg = input.value.trim();
             if(!msg) return;
-            
+
             add(msg, 'user');
             input.value = '';
             const typing = document.getElementById('typing');
             typing.style.display = 'block';
             typing.innerText = `${laAsesora.nombre} está escribiendo...`;
 
-           const api_key = "AIzaSyCuo4Z4uDJUI9CkOHyo2GxQQ6KVq5MVLcc"; 
+            // Escaneo de datos ocultos (El bot sabe el ID, pero NO lo menciona)
+            const postInfo = document.querySelector('div[style*="display: none"]') ? document.querySelector('div[style*="display: none"]').innerText : "";
+
+            const api_key = "AIzaSyCuo4Z4uDJUI9CkOHyo2GxQQ6KVq5MVLcc"; 
             
-            const instruccion = "Eres una asesora de salud amable llamada " + laAsesora.nombre + ". Responde de forma corta y humana a esto: " + msg;
+            const promptFinal = `
+                Eres ${laAsesora.nombre}, asesora experta de nuestra tienda. 
+                Tu tono es empático, usas "tú" para hablar con el cliente, pero usas "nosotros" para la empresa.
+                
+                INSTRUCCIONES CRÍTICAS:
+                1. JAMÁS menciones códigos técnicos como "ID_LOGISTICO" o nombres de bodegas internas al cliente. Son términos privados nuestros.
+                2. Si notas que los productos son de bodegas diferentes (por el código interno), explica que para garantizar agilidad despachamos desde diferentes puntos estratégicos del país.
+                3. Aclara que el cliente recibirá paquetes diferentes pero que nosotros asumimos el costo de envío.
+                4. No mezcles ofertas si los productos son de bodegas diferentes.
+                5. Sin negritas ni estilos de texto. Usa emojis. Una sola pregunta por respuesta.
+                
+                INFO DEL POST: ${postInfo}
+                MENSAJE: ${msg}
+            `;
 
             try {
                 const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }] })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptFinal }] }] })
                 });
                 const data = await response.json();
                 typing.style.display = 'none';
                 
                 if (data.candidates) {
-                    add(data.candidates[0].content.parts[0].text, 'bot');
-                } else {
-                    add("¡Ay! Se me cruzaron los cables un segundo. ¿Me repites por favor?", 'bot');
+                    let r = data.candidates[0].content.parts[0].text;
+                    // Limpieza total de negritas por si acaso
+                    add(r.replace(/\*\*/g, ""), 'bot');
                 }
             } catch (e) {
                 typing.style.display = 'none';
-                add("Disculpa, mi señal está un poco débil pero aquí sigo. ¿Qué me decías?", 'bot');
+                add("Disculpa, se me fue la señal un segundo. ¿Me repites por favor? 😊", 'bot');
             }
         }
 
@@ -99,7 +111,6 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
-        // Enviar con Enter
         document.getElementById('prompt').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') enviar();
         });
