@@ -1,40 +1,78 @@
-<script>
-    async function enviar() {
-        const input = document.getElementById('prompt');
-        const msg = input.value.trim();
-        if(!msg) return;
-        add(msg, 'user');
-        input.value = '';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Dayana</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f4f1ea; display: flex; flex-direction: column; height: 100vh; }
+        #header { background: #D4AF37; color: white; padding: 12px; display: flex; align-items: center; gap: 10px; }
+        #perfil-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; object-fit: cover; }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; }
+        .bot { background: white; align-self: flex-start; border: 1px solid #e0e0e0; color: #333; }
+        .user { background: #D4AF37; color: white; align-self: flex-end; }
+        #typing { font-size: 12px; color: #888; margin: 0 20px 10px; display: none; }
+        #input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eee; }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
+        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <img id="perfil-img" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp" alt="Dayana">
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-weight: bold;">Dayana</span>
+            <span style="font-size: 11px;">● En línea ahora</span>
+        </div>
+    </div>
+    <div id="chat"><div class="msg bot">¡Hola! Soy Dayana. 😊 ¿A qué ciudad va tu pedido?</div></div>
+    <div id="typing">Dayana está escribiendo...</div>
+    <div id="input-area">
+        <input type="text" id="prompt" placeholder="Escribe tu mensaje aquí...">
+        <button onclick="enviar()">🚀</button>
+    </div>
 
-        const k = "AIzaSyAdFnI6xHkmIHanSTZC4IIh7rxXyvhqS58";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
+    <script>
+        async function enviar() {
+            const input = document.getElementById('prompt');
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            add(msg, 'user');
+            input.value = '';
+            document.getElementById('typing').style.display = 'block';
 
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: msg }] }],
-                    // ESTO APAGA LOS FILTROS PARA QUE NO TE BLOQUEE POR SEGURIDAD
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.candidates && data.candidates[0].content) {
-                add(data.candidates[0].content.parts[0].text, 'bot');
-            } else {
-                // SI FALLA, NOS VA A DECIR EL ERROR REAL EN LA PANTALLA
-                add("Error de Google: " + (data.error ? data.error.message : "Respuesta vacía"), "bot");
-            }
-        } catch (e) {
-            add("Fallo de red total.", "bot");
-        }
-    }
-</script>
+            const k = "AIzaSyAdFnI6xHkmIHanSTZC4IIh7rxXyvhqS58";
+            // Link verificado con ":" para evitar el 404
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Responde como Dayana, asesora de ventas amable. Sé breve. Cliente dice: " + msg }] }],
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('typing').style.display = 'none';
+                
+                if (data.candidates && data.candidates[0].content) {
+                    let r = data.candidates[0].content.parts[0].text;
+                    add(r, 'bot');
+                } else if (data.error) {
+                    add("Error de Google: " + data.error.message, 'bot');
+                } else {
+                    add("Lo siento, ¿me lo repites de otra forma? 😊", 'bot');
+                }
+            } catch (e) {
+                document.getElementById('typing').style.display = 'none';
+                add("Sin conexión. Intenta
