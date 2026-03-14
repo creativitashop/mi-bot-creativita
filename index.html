@@ -26,14 +26,15 @@
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Escribe aquí...">
+        <input type="text" id="in" placeholder="Dime qué producto buscas...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
-        let dPost = { id: "", nombre: "nuestro producto", precio: "139.900" };
-        let saludoRealizado = false;
+        // Valores por defecto por si el post falla al enviar la info
+        let dPost = { id: "001", nombre: "nuestro tratamiento premium", precio: "139.900" };
+        let ciudadGuardada = "";
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -41,13 +42,13 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // EXTRACCIÓN DE DATOS DEL POST (CON SEGURIDAD)
+                // Captura agresiva de datos del post
                 const raw = e.data.info || "";
                 if(raw.includes("PRODUCTO_NOMBRE:")) dPost.nombre = raw.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
                 if(raw.includes("PRECIO_INDIVIDUAL:")) dPost.precio = raw.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Un gusto saludarte. Soy <b>${miAsesora.nombre}</b>, experta en salud preventiva. 🌿 ¿Sabías que prevenir es mucho mejor que curar? ¿A qué ciudad va tu pedido?`, 'bot');
+                    add(`¡Hola! Soy <b>${miAsesora.nombre}</b>, experta en salud preventiva. 🌿 Recuerda que <b>prevenir es mucho mejor que curar</b>. ¿Desde qué ciudad nos escribes para validar tu envío gratis?`, 'bot');
                 }
             }
         });
@@ -61,22 +62,22 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // RESPUESTA AL SALUDO (REQUISITO EXPLÍCITO)
-                if (m.match(/hola|buen|que tal|saludos/)) {
-                    r = `¡Hola! Muy buen día. 😊 Soy ${miAsesora.nombre}. Qué alegría que nos contactes para cuidar tu salud. Cuéntame, ¿te interesa el <b>${dPost.nombre}</b> o buscas algo más de nuestro extenso portafolio?`;
-                    saludoRealizado = true;
+                // 1. PRIORIDAD: SALUDOS (Responder siempre si el usuario saluda)
+                if (m.match(/hola|buen|que tal|saludos|hi|buenas/)) {
+                    r = `¡Hola! Muy buen día. 😊 Es un gusto atenderte. Soy ${miAsesora.nombre}. ¿Te gustaría conocer los beneficios del <b>${dPost.nombre}</b> o prefieres que te confirme el precio de promoción?`;
                 }
-                // PRECIO (CON VALIDACIÓN PARA QUE NO SALGA VACÍO)
-                else if (m.match(/precio|cuanto|valor|costo/)) {
-                    r = `¡Excelente pregunta! El <b>${dPost.nombre}</b> tiene un precio de promoción de **$${dPost.precio}**. 💰 Esta oferta se acaba en 24 horas. ¿Te gustaría que agendemos tu envío de una vez?`;
+                // 2. PRECIO (Asegurar que nunca salga vacío)
+                else if (m.match(/precio|cuanto|valor|costo|promocion/)) {
+                    r = `¡Claro que sí! Tu salud es lo primero. El <b>${dPost.nombre}</b> está hoy en solo **$${dPost.precio}**. 💰 Es una oferta limitada por 24 horas. ¿Te gustaría asegurar el tuyo ahora?`;
                 }
-                // LOGÍSTICA Y CIUDAD
-                else if (m.match(/bogota|medellin|cali|pereira|envio|donde/)) {
-                    r = `¡Perfecto! Tenemos cobertura allá con **ENVÍO GRATIS** y pago contra-entrega. 🚚 Para el <b>${dPost.nombre}</b> estamos entregando en 2-4 días. ¿Me regalas tus datos para la orden?`;
+                // 3. LOGÍSTICA / CIUDAD
+                else if (m.match(/bogota|medellin|cali|pereira|barranquilla|envio|donde/)) {
+                    ciudadGuardada = val;
+                    r = `¡Excelente! Tenemos cobertura en tu zona con **ENVÍO GRATIS** y pago contra-entrega. 🚚 ¿Deseas que agendemos tu pedido del <b>${dPost.nombre}</b> de una vez?`;
                 }
-                // CIERRE PERSUASIVO (POR DEFECTO)
+                // 4. CIERRE PERSUASIVO POR DEFECTO
                 else {
-                    r = `Entiendo perfectamente. Mi meta es que aproveches los beneficios del <b>${dPost.nombre}</b> hoy mismo. ✨ ¿Prefieres que te cuente más beneficios o procedemos con el pedido por **$${dPost.precio}**?`;
+                    r = `Entiendo perfectamente. Mi misión como experta es ayudarte a prevenir antes que curar. 🌿 El <b>${dPost.nombre}</b> es la mejor inversión para tu bienestar. ¿Procedemos con los datos para tu envío por **$${dPost.precio}**?`;
                 }
 
                 add(r, 'bot');
@@ -88,6 +89,7 @@
             const chat = document.getElementById('chat'); chat.appendChild(d);
             chat.scrollTop = chat.scrollHeight;
         }
+        document.getElementById('in').onkeypress = (e) => { if(e.key === 'Enter') send(); };
     </script>
 </body>
 </html>
