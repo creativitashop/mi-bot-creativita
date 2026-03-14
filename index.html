@@ -6,46 +6,34 @@
     <title>Equipo de Ventas - Tienda Oficial</title>
     <style>
         :root { --dorado: #D4AF37; --oscuro: #333; --verde: #28a745; --fondo: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--fondo); display: flex; flex-direction: column; height: 100vh; }
-        
-        /* CABEZOTE PROFESIONAL */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--fondo); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         #header { background: white; padding: 12px 20px; display: flex; align-items: center; border-bottom: 3px solid var(--dorado); box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; }
-        #avatar-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--dorado); object-fit: cover; margin-right: 15px; background: #eee; }
+        #avatar-img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--dorado); object-fit: cover; margin-right: 15px; }
         .info-header h2 { margin: 0; font-size: 16px; color: var(--oscuro); }
         .info-header span { font-size: 12px; color: var(--verde); font-weight: bold; display: flex; align-items: center; }
-        .info-header span::before { content: "●"; margin-right: 5px; font-size: 14px; }
-
-        /* ÁREA DE CHAT */
+        .info-header span::before { content: "●"; margin-right: 5px; }
         #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background-image: radial-gradient(#d1d1d1 0.5px, transparent 0.5px); background-size: 15px 15px; }
-        .msg { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .msg { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14px; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .bot { background: white; align-self: flex-start; border: 1px solid #ddd; border-bottom-left-radius: 4px; color: #333; }
         .user { background: var(--dorado); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        
-        /* IMÁGENES DE PRODUCTOS */
-        .img-prod { width: 100%; border-radius: 10px; margin-top: 10px; border: 1px solid #eee; display: block; }
-
-        /* ENTRADA DE TEXTO */
         #input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eee; align-items: center; }
-        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 20px; outline: none; font-size: 14px; }
-        button { background: var(--dorado); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        button:hover { transform: scale(1.05); background: #b8962d; }
-        
+        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 20px; outline: none; }
+        button { background: var(--dorado); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .typing { font-size: 11px; color: #888; margin-left: 20px; display: none; margin-bottom: 10px; }
+        .img-prod { width: 100%; border-radius: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div id="header">
-        <img src="" id="avatar-img" alt="Asesora de Ventas">
+        <img src="" id="avatar-img" alt="Asesora">
         <div class="info-header">
             <h2 id="nombre-asesora">Conectando...</h2>
             <span>En línea - Respuesta inmediata</span>
         </div>
     </div>
 
-    <div id="chat">
-        </div>
-    
+    <div id="chat"></div>
     <div id="typing" class="typing">Escribiendo respuesta...</div>
 
     <div id="input-area">
@@ -54,7 +42,6 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE LAS 5 ASESORAS REALES
         const equipo = [
             { nombre: "Dayana", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp" },
             { nombre: "Carolina", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4EJO6iV4Z-Itf2sYYwuqldfLYxibew0bjGGlCatlNCAdjLQvWU7RY4RWVkV8QybdiAmqGb829UIE56Zir7sj7lvafx8v09VoSS9sU5XLHh6lvzBKmBokxtngaYIMxFAn0U3V4ZM23rZZsyKYwKM8nA7_ZVYMJ9AEqc8dowQUzE78mM8Rhr2klWIdISk5y/s1600/StockCake-Friendly-Call-Center_1723420268.webp" },
@@ -63,19 +50,26 @@
             { nombre: "Paola", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjj8UIYW0ose63ONacNpqFaV35lkGDDm-PYj_kWP7D_RIoxFUAe2bLr0d9L3lB-I9LDYFl6TmyrRMu557lQXWM-DU329joWK73qKPeS9kUmmBbXv8hUhETNKVBZG7HHALhOs_8AIj9zKj8tr6UZl7FvF18jr-jCF-XSN-GuZGSR1YFtQuzBhKB068YXv3o8/s1600/que-es-una-diadema-inalambrica.jpg" }
         ];
 
-        // SELECCIÓN ALEATORIA DE ASESORA
-        const asesoraActiva = equipo[Math.floor(Math.random() * equipo.length)];
-        
+        const asesora = equipo[Math.floor(Math.random() * equipo.length)];
+        let infoPost = "nuestra tienda";
+
         window.onload = () => {
-            document.getElementById('avatar-img').src = asesoraActiva.foto;
-            document.getElementById('nombre-asesora').innerText = asesoraActiva.nombre + " - Ventas";
-            add(`¡Hola! Soy <b>${asesoraActiva.nombre}</b>. 😊 Bienvenida a nuestra tienda oficial. ¿Desde qué ciudad nos escribes y qué producto estás buscando hoy?`, 'bot');
+            document.getElementById('avatar-img').src = asesora.foto;
+            document.getElementById('nombre-asesora').innerText = asesora.nombre + " - Asesora Senior";
+            add(`¡Hola! Soy <b>${asesora.nombre}</b>. 😊 Bienvenida. Veo que estás revisando nuestros productos. ¿En qué ciudad estás y qué te interesa llevar hoy?`, 'bot');
         };
 
-        const respuestas = [
-            { claves: ["foto", "ver", "catalogo", "mueble", "imagenes"], respuesta: "¡Claro que sí! Mira, estos son algunos de nuestros diseños estrella. Son prácticos y elegantes:<br><img src='https://cdn.pixabay.com/photo/2017/08/02/01/01/living-room-2569325_1280.jpg' class='img-prod'>" },
-            { claves: ["precio", "cuanto", "valor", "costo"], respuesta: "Manejamos precios directos de fábrica para que ahorres. 💰 ¿Qué mueble te interesa? ¡Dime cuál y te doy el valor con descuento!" },
-            { claves: ["bogota", "medellin", "cali", "pereira", "envio", "flete"], respuesta: "¡Excelente noticia! Tenemos envíos coordinados a tu zona con total seguridad. 🚚 ¿Qué producto te gustaría que te cotizáramos hoy?" }
+        // CONEXIÓN CON EL BLOG
+        window.addEventListener("message", (e) => {
+            if (e.data.tipo === "INFO_PAGINA") { infoPost = e.data.datos; }
+        }, false);
+
+        // CATÁLOGO GENERAL Y VENTA CRUZADA
+        const catalogo = [
+            { claves: ["tyruss", "quemador", "combo 1"], respuesta: "El Combo 1 de **Tyruss Full** es nuestra oferta estrella de hoy por solo **$139.900**. ¿Sabías que también incluye el colágeno hidrolizado? Es el dúo perfecto. 🏃‍♂️✨" },
+            { claves: ["colageno", "magnesio", "citrato"], respuesta: "Nuestro **Colágeno con Citrato de Magnesio** es ideal para la piel y articulaciones. Viene en el combo con el Tyruss por $139.900. ¿Deseas que te lo separe? 🧴" },
+            { claves: ["precio", "cuanto", "valor", "vale"], respuesta: "Si te interesa el combo del post, el valor es de **$139.900**. 💰 Es precio de fábrica. ¿Para qué ciudad sería el envío?" },
+            { claves: ["envio", "bogota", "medellin", "cali", "pereira"], respuesta: "¡Excelente! A esa ciudad llegamos con entrega segura. 🚚 ¿Te gustaría confirmar tu pedido de una vez?" }
         ];
 
         function enviar() {
@@ -89,13 +83,10 @@
 
             setTimeout(() => {
                 document.getElementById('typing').style.display = 'none';
-                let res = `Entiendo. Como tu asesora de confianza, quiero ayudarte a elegir lo mejor. 😊 ¿Te gustaría ver fotos de un modelo específico o prefieres que hablemos del precio?`;
+                let res = `Entiendo. En este post tenemos el **Combo Tyruss + Colágeno**. Como asesora, te lo recomiendo mucho. ¿Buscas el precio o quieres saber más beneficios? 😊`;
                 
-                for (let item of respuestas) {
-                    if (item.claves.some(c => userMsg.includes(c))) {
-                        res = item.respuesta;
-                        break;
-                    }
+                for (let item of catalogo) {
+                    if (item.claves.some(c => userMsg.includes(c))) { res = item.respuesta; break; }
                 }
                 add(res, 'bot');
             }, 1000);
