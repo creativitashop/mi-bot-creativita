@@ -11,7 +11,7 @@
         #nombre-asesora { font-weight: bold; font-size: 16px; }
         #estado { font-size: 11px; opacity: 0.9; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; }
+        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; position: relative; }
         .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #e0e0e0; color: #333; }
         .user { background: #D4AF37; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         #typing { font-size: 12px; color: #888; margin: 0 20px 15px; display: none; font-style: italic; }
@@ -63,30 +63,31 @@
             typing.innerText = `${laAsesora.nombre} está escribiendo...`;
             typing.style.display = 'block';
 
-            // ESTA ES LA LLAVE QUE DEBE FUNCIONAR
             const api_key = "AIzaSyCuo4Z4uDJUI9CkOHyo2GxQQ6KVq5MVLcc"; 
-            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${api_key}`;
 
             const payload = {
-                contents: [{ parts: [{ text: `Tu nombre es ${laAsesora.nombre}. Eres experta en salud preventiva. REGLAS: 1. No uses negritas NUNCA. 2. Habla de tú. 3. Precios RTAFULL: 1x79.900, 2x119.900, 3x159.800. 4. No fincas. 5. Obsequio loción termoactiva solo al final. Responde corto a: ${msg}` }] }]
+                contents: [{ parts: [{ text: `Tu nombre es ${laAsesora.nombre}. Eres experta en salud preventiva. REGLAS: 1. No uses negritas NUNCA. 2. Habla de tú. 3. Precios RTAFULL: 1x79.900, 2x119.900, 3x159.800. 4. No fincas. 5. Obsequio loción termoactiva solo al final. Responde de forma muy humana y persuasiva a: ${msg}` }] }]
             };
 
             try {
                 const response = await fetch(url, {
                     method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
                 typing.style.display = 'none';
+                
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     let r = data.candidates[0].content.parts[0].text.replace(/\*\*/g, "");
                     add(r, 'bot');
                 } else {
-                    add("Parece que hubo un pequeño error técnico. ¿Me puedes repetir?", "bot");
+                    add("Perdona, se me entrecortó la señal. ¿Qué me decías? 😊", "bot");
                 }
             } catch (e) {
                 typing.style.display = 'none';
-                add("Lo siento, mi conexión falló. ¿Intentamos de nuevo?", "bot");
+                add("Lo siento, tengo un problema de conexión. ¿Podemos intentar de nuevo?", "bot");
             }
         }
 
