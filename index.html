@@ -1,70 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat RTA</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f4f1ea; }
-        #header { background: #D4AF37; color: white; padding: 15px; text-align: center; font-weight: bold; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px; border-radius: 10px; max-width: 80%; }
-        .bot { background: white; align-self: flex-start; }
-        .user { background: #D4AF37; color: white; align-self: flex-end; }
-        #input-area { display: flex; padding: 10px; background: white; }
-        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { margin-left: 5px; padding: 10px; background: #D4AF37; color: white; border: none; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div id="header">Dayana - Asesora en Línea</div>
-    <div id="chat"><div class="msg bot">¡Hola! ¿A qué ciudad va tu pedido?</div></div>
-    <div id="input-area">
-        <input type="text" id="prompt" placeholder="Escribe aquí...">
-        <button onclick="enviar()">🚀</button>
-    </div>
+<script>
+    async function enviar() {
+        const input = document.getElementById('prompt');
+        const msg = input.value.trim();
+        if(!msg) return;
+        add(msg, 'user');
+        input.value = '';
 
-    <script>
-        async function enviar() {
-            const input = document.getElementById('prompt');
-            const msg = input.value.trim();
-            if(!msg) return;
-            add(msg, 'user');
-            input.value = '';
+        const k = "AIzaSyAdFnI6xHkmIHanSTZC4IIh7rxXyvhqS58";
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
 
-            const k = "AIzaSyAdFnI6xHkmIHanSTZC4IIh7rxXyvhqS58";
-            // Link verificado con dos puntos (:) según image_255999
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
-
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Responde muy corto y amable a esto: " + msg }] }]
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.candidates && data.candidates[0].content) {
-                    add(data.candidates[0].content.parts[0].text, 'bot');
-                } else {
-                    add("No te entendí, ¿repites?", "bot");
-                    console.log(data); // Esto nos dirá el error en la consola F12
-                }
-            } catch (e) {
-                add("Error de red.", "bot");
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: msg }] }],
+                    // ESTO APAGA LOS FILTROS PARA QUE NO TE BLOQUEE POR SEGURIDAD
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0].content) {
+                add(data.candidates[0].content.parts[0].text, 'bot');
+            } else {
+                // SI FALLA, NOS VA A DECIR EL ERROR REAL EN LA PANTALLA
+                add("Error de Google: " + (data.error ? data.error.message : "Respuesta vacía"), "bot");
             }
+        } catch (e) {
+            add("Fallo de red total.", "bot");
         }
-
-        function add(t, c) {
-            const div = document.createElement('div');
-            div.className = 'msg ' + c;
-            div.innerText = t;
-            const chat = document.getElementById('chat');
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
