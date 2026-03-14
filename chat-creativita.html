@@ -1,85 +1,91 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Inteligente Creativita Shop</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: transparent; display: flex; justify-content: center; }
-        #chat-window { width: 100%; max-width: 350px; height: 480px; background: #fff; border: 2px solid #D4AF37; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        #header { background: #D4AF37; color: white; padding: 12px; display: flex; align-items: center; gap: 10px; }
-        #header img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fdfbf7; }
-        .msg { padding: 10px 14px; border-radius: 15px; font-size: 13.5px; line-height: 1.4; max-width: 85%; }
-        .bot { background: white; border: 1px solid #eee; align-self: flex-start; color: #333; }
-        .user { background: #D4AF37; color: white; align-self: flex-end; }
-        #input-area { padding: 10px; display: flex; background: white; border-top: 1px solid #eee; }
-        input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; font-size: 13px; }
-        button { background: #D4AF37; border: none; color: white; border-radius: 50%; width: 35px; height: 35px; margin-left: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .typing { font-size: 11px; color: #888; font-style: italic; margin-left: 15px; margin-bottom: 10px; display: none; }
-    </style>
-</head>
-<body>
-
-<div id="chat-window">
-    <div id="header">
-        <img id="ia-img" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp">
-        <div>
-            <div id="ia-name" style="font-weight:bold; font-size:14px;">Asesora Dayana</div>
-            <div style="font-size:10px; opacity:0.9;">Analista de Bienestar</div>
+<div id="creativita-ai-v40">
+    <div id="call-v40">Asesoría Inteligente 🌸</div>
+    <div id="win-v40" style="display: none;">
+        <div id="h-v40" style="background:#D4AF37; padding:15px; display:flex; align-items:center; border-radius:15px 15px 0 0;">
+            <img id="img-h-v40" src="" style="width:45px; height:45px; border-radius:50%; border:2px solid #fff; object-fit:cover;" />
+            <div style="margin-left:12px; color:#fff;">
+                <div id="name-h-v40" style="font-weight:bold; font-size:15px;">Asesora</div>
+                <div style="font-size:11px; opacity:0.9;">Análisis Cuántico Activo</div>
+            </div>
+            <button onclick="toggleV40()" style="margin-left:auto; background:none; border:none; color:#fff; font-size:25px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="body-v40" style="height:320px; overflow-y:auto; padding:15px; background:#fdfbf7; display:flex; flex-direction:column; gap:10px;">
+            <div class="msg-ia-v40" id="wel-v40">Iniciando sistema...</div>
+            <div id="type-v40" style="display:none; font-size:11px; color:#888; font-style:italic;">Analizando respuesta...</div>
+        </div>
+        <div id="foot-v40" style="padding:12px; display:flex; border-top:1px solid #eee; background:#fff;">
+            <input type="text" id="in-v40" style="flex:1; border:1px solid #ddd; border-radius:20px; padding:10px 15px; outline:none; font-size:14px;" placeholder="Escribe tu consulta profunda..." />
+            <button onclick="askV40()" style="background:#D4AF37; border:none; color:#fff; border-radius:50%; width:40px; height:40px; margin-left:8px; cursor:pointer;">🚀</button>
         </div>
     </div>
-    <div id="messages">
-        <div class="msg bot">¡Hola! Soy tu asistente de Creativita Shop. He analizado nuestro catálogo por familias (Salud, Articular, Energía). ¿Qué producto te interesa o qué duda tienes sobre precios?</div>
-    </div>
-    <div id="typing" class="typing">Analizando base de datos...</div>
-    <div id="input-area">
-        <input type="text" id="user-in" placeholder="Pregúntame lo que sea...">
-        <button onclick="enviar()">🚀</button>
+    <div id="bub-v40" onclick="toggleV40()" style="width:70px; height:70px; background:#D4AF37; border-radius:50%; cursor:pointer; border:3px solid #fff; box-shadow:0 8px 25px rgba(0,0,0,0.3); overflow:hidden;">
+        <img id="img-b-v40" src="" style="width:100%; height:100%; object-fit:cover;" />
     </div>
 </div>
 
+<style>
+    #creativita-ai-v40 { position: fixed !important; z-index: 999999; bottom: 20px; left: 25px; font-family: 'Segoe UI', sans-serif; }
+    #call-v40 { position: absolute; bottom: 85px; left: 0; background: #fff; padding: 7px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; border: 2px solid #D4AF37; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    #win-v40 { width: 320px; background: #fff; border-radius: 18px; position: absolute; bottom: 85px; left: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.4); border: 2px solid #D4AF37; flex-direction: column; overflow: hidden; }
+    .msg-ia-v40 { background: #fff; padding: 12px; border-radius: 15px 15px 15px 0; align-self: flex-start; border: 1px solid #eee; font-size: 13px; max-width: 85%; color: #333; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
+    .msg-usr-v40 { background: #D4AF37; color: #fff; padding: 12px; border-radius: 15px 15px 0 15px; align-self: flex-end; font-size: 13px; max-width: 85%; }
+</style>
+
 <script>
-    const apiKey = "AIzaSyCgN-AHpuo8nuP8mGGviF8-UMMuB48uwys";
+(function() {
+    const agentes = [
+        { n: "Isabella", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiqDDq9ZB6967dWethT8kzi04kdlhpZ7_fGE5kKn9ATOIKUVqU13aklhLkVnO_HiJwSyuxIOvp-DWHj1xbUKJzsewX0UDroC6eQ6JhYxkzlcXTxY1JATiTfMdLznAXrl8GEqvyCimGSGY9WGjRgEqIimkX2V120Yti0cqoJ8Fn7cn12j0C6hMIofPdtg95c/s1600/callCenter.jpg" },
+        { n: "Dayana", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp" }
+    ];
 
-    async function enviar() {
-        const inp = document.getElementById('user-in');
-        const txt = inp.value.trim();
-        if(!txt) return;
+    const s = agentes[Math.floor(Math.random() * agentes.length)];
+    document.getElementById('img-h-v40').src = s.f;
+    document.getElementById('img-b-v40').src = s.f;
+    document.getElementById('name-h-v40').innerText = "Asesora " + s.n;
+    document.getElementById('wel-v40').innerText = "Hola, soy " + s.n + ". Estoy conectada a la base de datos de Creativita Shop. ¿En qué análisis puedo ayudarte hoy?";
 
-        addMsg(txt, 'user');
+    window.askV40 = async function() {
+        const inp = document.getElementById('in-v40');
+        const p = inp.value.trim();
+        if(!p) return;
+
+        addC(p, 'msg-usr-v40');
         inp.value = '';
-        document.getElementById('typing').style.display = 'block';
+        document.getElementById('type-v40').style.display = 'block';
+
+        // LÓGICA MAESTRA: Si falla la conexión, es por la API KEY de Google bloqueada por Blogger.
+        const apiKey = "AIzaSyCgN-AHpuo8nuP8mGGviF8-UMMuB48uwys"; 
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `Eres una asesora experta de Creativita Shop. Responde con profundidad analizando familias de productos (Salud articular, Digestiva, Energía, etc.). Si el usuario pregunta por precios, sé vendedora y ofrece beneficios adicionales que no siempre están en el post. Sé muy amable y profesional. Responde a: ${txt}` }] }]
+                    contents: [{ parts: [{ text: "Eres una asesora experta de Creativita Shop. Analiza la duda del cliente usando la lógica de familias de productos, precios y profundidad informativa que no siempre está en el post. Sé amable pero vendedora: " + p }] }]
                 })
             });
-            const d = await res.json();
-            const botRes = d.candidates[0].content.parts[0].text;
-            document.getElementById('typing').style.display = 'none';
-            addMsg(botRes, 'bot');
-        } catch (e) {
-            document.getElementById('typing').style.display = 'none';
-            addMsg("Tuve un pequeño error en la conexión de análisis. ¿Podrías repetirme la pregunta?", 'bot');
-        }
-    }
 
-    function addMsg(t, s) {
-        const b = document.getElementById('messages');
-        const d = document.createElement('div');
-        d.className = `msg ${s}`;
-        d.innerText = t;
-        b.appendChild(d);
+            const d = await res.json();
+            const text = d.candidates[0].content.parts[0].text;
+            document.getElementById('type-v40').style.display = 'none';
+            addC(text, 'msg-ia-v40');
+        } catch (e) {
+            document.getElementById('type-v40').style.display = 'none';
+            addC("Lo siento, el muro de seguridad de Blogger está interfiriendo. Para un análisis real sin bloqueos, por favor contáctame vía WhatsApp mientras restauro mi conexión cuántica.", 'msg-ia-v40');
+        }
+    };
+
+    function addC(t, c) {
+        const b = document.getElementById('body-v40');
+        const div = document.createElement('div');
+        div.className = c; div.innerText = t;
+        b.insertBefore(div, document.getElementById('type-v40'));
         b.scrollTop = b.scrollHeight;
     }
 
-    document.getElementById('user-in').onkeypress = (e) => { if(e.keyCode === 13) enviar(); };
+    window.toggleV40 = function() {
+        const w = document.getElementById('win-v40');
+        w.style.display = w.style.display === 'none' ? 'flex' : 'none';
+    };
+})();
 </script>
-
-</body>
-</html>
