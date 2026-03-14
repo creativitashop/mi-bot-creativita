@@ -4,33 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f9f6f0; display: flex; flex-direction: column; height: 100vh; }
-        #header { background: #D4AF37; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.1em; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .msg { padding: 12px 16px; border-radius: 18px; max-width: 85%; line-height: 1.5; font-size: 14px; position: relative; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .bot { background: white; align-self: flex-start; color: #444; border: 1px solid #e0e0e0; border-bottom-left-radius: 2px; box-shadow: 2px 2px 8px rgba(0,0,0,0.05); }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background-color: #f4f1ea; display: flex; flex-direction: column; height: 100vh; }
+        #header { background: #D4AF37; color: white; padding: 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        #perfil-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; background-color: #eee; object-fit: cover; }
+        #status-info { display: flex; flex-direction: column; }
+        #nombre-asesora { font-weight: bold; font-size: 16px; }
+        #estado { font-size: 11px; opacity: 0.9; }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { padding: 12px 15px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #e0e0e0; color: #333; box-shadow: 2px 2px 5px rgba(0,0,0,0.02); }
         .user { background: #D4AF37; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        #typing { font-size: 12px; color: #888; margin-left: 20px; display: none; font-style: italic; }
-        #input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eee; align-items: center; }
-        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 20px; outline: none; transition: border 0.3s; }
-        input:focus { border-color: #D4AF37; }
-        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 10px; cursor: pointer; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; }
-        button:hover { transform: scale(1.1); background: #b8962d; }
+        #typing { font-size: 12px; color: #888; margin: 0 20px 10px; display: none; font-style: italic; }
+        #input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eee; }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; font-size: 14px; }
+        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; font-size: 20px; transition: 0.2s; }
+        button:hover { background: #b8962d; transform: scale(1.05); }
     </style>
 </head>
 <body>
-    <div id="header">Tu Asesora Creativita Shop 🌸</div>
-    <div id="chat">
-        <div class="msg bot">¡Hola! Qué alegría saludarte. Soy Isabella, tu asesora personal de bienestar. 😊<br><br>Estoy aquí para escucharte y ayudarte a encontrar el tratamiento ideal para transformar tu salud. ¿Cómo te sientes hoy?</div>
+    <div id="header">
+        <img id="perfil-img" src="" alt="Asesora">
+        <div id="status-info">
+            <span id="nombre-asesora">...</span>
+            <span id="estado">● En línea ahora</span>
+        </div>
     </div>
-    <div id="typing">Isabella está analizando tu caso...</div>
+    <div id="chat">
+        <div id="bienvenida" class="msg bot"></div>
+    </div>
+    <div id="typing"></div>
     <div id="input-area">
-        <input type="text" id="prompt" placeholder="Cuéntame, ¿qué te gustaría mejorar?">
+        <input type="text" id="prompt" placeholder="Cuéntame, ¿qué necesitas mejorar hoy?">
         <button onclick="enviar()">🚀</button>
     </div>
 
     <script>
+        // CONFIGURACIÓN DE ASESORAS ALEATORIAS
+        const asesoras = [
+            { nombre: "Dayana", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp" },
+            { nombre: "Isabella", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4EJO6iV4Z-Itf2sYYwuqldfLYxibew0bjGGlCatlNCAdjLQvWU7RY4RWVkV8QybdiAmqGb829UIE56Zir7sj7lvafx8v09VoSS9sU5XLHh6lvzBKmBokxtngaYIMxFAn0U3V4ZM23rZZsyKYwKM8nA7_ZVYMJ9AEqc8dowQUzE78mM8Rhr2klWIdISk5y/s1600/StockCake-Friendly-Call-Center_1723420268.webp" },
+            { nombre: "Carolina", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiqDDq9ZB6967dWethT8kzi04kdlhpZ7_fGE5kKn9ATOIKUVqU13aklhLkVnO_HiJwSyuxIOvp-DWHj1xbUKJzsewX0UDroC6eQ6JhYxkzlcXTxY1JATiTfMdLznAXrl8GEqvyCimGSGY9WGjRgEqIimkX2V120Yti0cqoJ8Fn7cn12j0C6hMIofPdtg95c/s1600/callCenter.jpg" },
+            { nombre: "Valentina", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjdjwIeoO7YnjtpkXiXxFKUiSy8ssQGvsD85vXebU4buDEXgWV0_6LwQzXAO2172qBVamwBLKczRRWpP4MJOGFm6ImQ7WMVK0ghkQZNupB-__Upf3e0j2FInTxeGOs7cZfGgGnBH5WeQ0tVOQOfZrxXMJKpeT4bXz8VHjKEsWQ6MAQJspN43SU_fw54uo7N/s1600/telemarketing_002.jpg" },
+            { nombre: "Camila", foto: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjj8UIYW0ose63ONacNpqFaV35lkGDDm-PYj_kWP7D_RIoxFUAe2bLr0d9L3lB-I9LDYFl6TmyrRMu557lQXWM-DU329joWK73qKPeS9kUmmBbXv8hUhETNKVBZG7HHALhOs_8AIj9zKj8tr6UZl7FvF18jr-jCF-XSN-GuZGSR1YFtQuzBhKB068YXv3o8/s1600/que-es-una-diadema-inalambrica.jpg" }
+        ];
+
+        // Selección aleatoria al iniciar
+        const laAsesora = asesoras[Math.floor(Math.random() * asesoras.length)];
+        document.getElementById('nombre-asesora').innerText = laAsesora.nombre;
+        document.getElementById('perfil-img').src = laAsesora.foto;
+        document.getElementById('bienvenida').innerHTML = `¡Hola! Un gusto saludarte, soy <b>${laAsesora.nombre}</b>. 😊 <br><br>Cuéntame, ¿cómo te sientes hoy? Estoy aquí para asesorarte con lo mejor para tu bienestar.`;
+
         async function enviar() {
             const input = document.getElementById('prompt');
             const msg = input.value.trim();
@@ -38,40 +62,41 @@
             
             add(msg, 'user');
             input.value = '';
-            document.getElementById('typing').style.display = 'block';
+            const typing = document.getElementById('typing');
+            typing.style.display = 'block';
+            typing.innerText = `${laAsesora.nombre} está escribiendo...`;
 
             const api_key = "AIzaSyCuo4Z4uDJUI9CkOHyo2GxQQ6KVq5MVLcc"; 
             
             const instruccion = `
-                Eres Isabella, una asesora humana, empática y profesional de Creativita Shop Colombia. 
-                TU PERSONALIDAD: Amable, cálida, experta en salud natural y muy comercial pero sin presionar.
-                TUS REGLAS:
-                1. No uses listas aburridas. Habla como si estuvieras en un café con el cliente.
-                2. Si el cliente tiene un dolor (ej: rodillas, falta de energía), sé comprensiva primero. "Entiendo perfectamente lo frustrante que es..."
-                3. Menciona siempre beneficios profundos (vitalidad, dormir mejor, recuperar tu vida).
-                4. Usa emojis suaves 🌸, ✨, 😊 para parecer humana.
-                5. Siempre termina con una pregunta para seguir la charla: "¿Te gustaría saber cómo aplicarlo?" o "¿Hace cuánto sientes ese malestar?".
-                6. Si preguntan precios, dalo con naturalidad y resalta que es una inversión en su salud.
+                Eres ${laAsesora.nombre}, una asesora humana, cálida y profesional de Creativita Shop. 
+                TU OBJETIVO: Ayudar al cliente con su salud y cerrar la venta de forma amable.
+                REGLAS DE ORO:
+                - Sé empática. Si dicen que algo les duele, di: "Siento mucho que pases por eso, pero no te preocupes..."
+                - Habla de forma natural, sin listas largas ni lenguaje robótico.
+                - Usa emojis con moderación para verte cercana.
+                - Siempre termina con una pregunta para mantener la charla viva.
+                - Si preguntan precio, dalo con confianza resaltando el beneficio.
+                Responde a: ${msg}
             `;
 
             try {
                 const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: instruccion + " El cliente dice: " + msg }] }] })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: instruccion }] }] })
                 });
-                
                 const data = await response.json();
-                document.getElementById('typing').style.display = 'none';
+                typing.style.display = 'none';
                 
                 if (data.candidates) {
                     add(data.candidates[0].content.parts[0].text, 'bot');
                 } else {
-                    add("Ay, discúlpame. Me distraje un segundo analizando unos resultados. ¿Me podrías repetir?", 'bot');
+                    add("¡Ay! Se me cruzaron los cables un segundo. ¿Me repites por favor?", 'bot');
                 }
             } catch (e) {
-                document.getElementById('typing').style.display = 'none';
-                add("Parece que mi conexión está un poco lenta, pero no te preocupes, ¡aquí sigo contigo! ¿Qué me decías?", 'bot');
+                typing.style.display = 'none';
+                add("Disculpa, mi señal está un poco débil pero aquí sigo. ¿Qué me decías?", 'bot');
             }
         }
 
@@ -83,6 +108,11 @@
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
         }
+
+        // Enviar con Enter
+        document.getElementById('prompt').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') enviar();
+        });
     </script>
 </body>
 </html>
