@@ -26,13 +26,13 @@
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Escribe tu mensaje aquí...">
+        <input type="text" id="in" placeholder="Escribe aquí...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
-        let dPost = { nombre: "producto", precio: "oferta" };
+        let dPost = { nombre: "producto", precio: "0" };
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -40,20 +40,19 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // BÚSQUEDA ULTRA-REFORZADA DE DATOS
-                const raw = e.data.info || "";
+                // LIMPIEZA TOTAL DE CARACTERES OCULTOS DEL BLOG
+                let raw = e.data.info || "";
+                // Reemplazamos espacios especiales y saltos por espacios simples
+                raw = raw.replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]/g, " ");
                 
-                // Limpiamos el texto de espacios raros y saltos de línea
-                const cleanText = raw.replace(/\s+/g, ' ');
-
-                const matchNombre = cleanText.match(/PRODUCTO_NOMBRE:\s*([^:]+?)(?=\s*PRECIO_INDIVIDUAL|$)/i);
-                const matchPrecio = cleanText.match(/PRECIO_INDIVIDUAL:\s*(\d+[\d.]*)/i);
+                const matchNombre = raw.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|ID_LOGISTICO|$)/i);
+                const matchPrecio = raw.match(/PRECIO_INDIVIDUAL:\s*(\d+[\d.]*)/i);
 
                 if(matchNombre) dPost.nombre = matchNombre[1].trim();
                 if(matchPrecio) dPost.precio = matchPrecio[1].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. Es un gusto saludarte. ¿En qué producto estás interesado el día de hoy para darte el precio correcto?`, 'bot');
+                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio correcto?`, 'bot');
                 }
             }
         });
@@ -66,24 +65,26 @@
             setTimeout(() => {
                 const m = val.toLowerCase();
                 let r = "";
-                const pNombre = dPost.nombre;
-                const pPrecio = dPost.precio;
+                
+                // USAR SIEMPRE EL VALOR CAPTURADO
+                const nom = dPost.nombre;
+                const pre = dPost.precio === "0" ? "en oferta" : dPost.precio;
 
                 if (m.match(/hola|buen/)) {
-                    r = `¡Hola! Muy buen día. 😊 Soy ${miAsesora.nombre}. ¿Te interesa conocer el precio y beneficios del <b>${pNombre}</b> o buscas algo más?`;
+                    r = `¡Hola! Muy buen día. 😊 ¿Te interesa el <b>${nom}</b> o buscas otro producto?`;
                 }
-                else if (m.includes("precio") || m.includes("cuanto") || m.includes("valor")) {
-                    r = `Claro que sí. El <b>${pNombre}</b> está hoy en promoción por solo **$${pPrecio}**. 💰 Incluye envío gratis y pago contra-entrega. ¿A qué ciudad sería tu envío?`;
+                else if (m.match(/precio|cuanto|valor|vale/)) {
+                    r = `Claro que sí. El <b>${nom}</b> tiene un valor de **$${pre}** hoy mismo. 💰 Incluye envío gratis y pago contra-entrega. ¿Te gustaría que tomara tus datos?`;
                 }
-                else if (m.match(/bogota|medellin|cali|pereira|envio/)) {
-                    r = `¡Súper! Tenemos cobertura total allá. 🚚 Para agendar tu <b>${pNombre}</b> por **$${pPrecio}**, ¿me confirmas tu nombre y dirección con barrio?`;
+                else if (m.match(/rtafull|colageno|coliaplus|coliplus|producto/)) {
+                    r = `¡Excelente! El <b>${nom}</b> es de lo más pedido por su efectividad. ✨ El precio es de **$${pre}**. ¿A qué ciudad sería el envío?`;
                 }
                 else {
-                    r = `Como tu asesora, te recomiendo aprovechar esta oferta del <b>${pNombre}</b> por solo **$${pPrecio}**. ✨ Prevenir es mejor que curar. ¿Deseas que agendemos tu pedido?`;
+                    r = `Como tu asesora, te confirmo que el <b>${nom}</b> por **$${pre}** es la mejor inversión para tu salud hoy. 🌿 ¿Deseas aprovechar la promoción?`;
                 }
 
                 add(r, 'bot');
-            }, 800);
+            }, 600);
         }
 
         function add(t, c) {
@@ -91,7 +92,6 @@
             const chat = document.getElementById('chat'); chat.appendChild(d);
             chat.scrollTop = chat.scrollHeight;
         }
-        document.getElementById('in').onkeypress = (e) => { if(e.key === 'Enter') send(); };
     </script>
 </body>
 </html>
