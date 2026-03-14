@@ -63,21 +63,22 @@
             typing.innerText = `${laAsesora.nombre} está escribiendo...`;
             typing.style.display = 'block';
 
-            // LLAVE DE RESPALDO (Asegúrate de no tener espacios extras)
-            const api_key = "AIzaSyCuo4Z4uDJUI9CkOHyo2GxQQ6KVq5MVLcc"; 
+            // TU NUEVA LLAVE CARGADA
+            const api_key = "AIzaSyBZn7UsbZjsEIeBGjmfiGLAVIBQU1SlmmI"; 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${api_key}`;
 
             const payload = {
                 contents: [{ 
-                    parts: [{ text: `Actúa como ${laAsesora.nombre}, experta en salud preventiva de RTAFULL. 
-                    REGLAS: 
-                    - NUNCA uses negritas ni símbolos como **. 
-                    - Habla de tú, de forma muy humana y empática. 
-                    - Precios: 1 tarro $79.900, 2 tarros $119.900, 3 tarros $159.800. 
-                    - No entregamos en fincas, solo en oficina Interrapidisimo. 
-                    - Menciona que "prevenir es mejor que curar". 
-                    - Si te dan los datos de envío, diles que por su compra hoy les regalas una LOCION TERMOACTIVA.
-                    Responde brevemente a: ${msg}` }] 
+                    parts: [{ text: `Eres ${laAsesora.nombre}, asesora experta en salud preventiva de RTAFULL. 
+                    REGLAS DE ORO: 
+                    1. NO USAR NEGRITAS ni asteriscos (**). 
+                    2. Habla de tú, sé empática y muy persuasiva. 
+                    3. Usa el concepto: "prevenir es mejor que curar". 
+                    4. Precios: 1x$79.900, 2x$119.900, 3x$159.800. 
+                    5. Si viven en finca, diles que entregas en oficina Interrapidisimo. 
+                    6. El obsequio de la loción termoactiva solo se menciona cuando den todos los datos de envío. 
+                    7. Sé breve y cierra siempre con una pregunta.
+                    Responde a: ${msg}` }] 
                 }]
             };
 
@@ -87,22 +88,18 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-                
                 const data = await response.json();
                 typing.style.display = 'none';
                 
                 if (data.candidates && data.candidates[0].content) {
-                    let r = data.candidates[0].content.parts[0].text;
-                    // Limpieza total de negritas por si la IA se salta la regla
-                    r = r.replace(/\*/g, ""); 
+                    let r = data.candidates[0].content.parts[0].text.replace(/\*/g, ""); 
                     add(r, 'bot');
                 } else {
-                    console.log(data); // Para ver el error en consola si falla
-                    add("¡Ay! Parece que se me fue el internet un segundo. 😅 ¿Me repites, por favor?", "bot");
+                    add("Se me cortó la señal un segundo, ¡qué pena! ¿Me repites por favor? 😊", "bot");
                 }
             } catch (e) {
                 typing.style.display = 'none';
-                add("Lo siento, mi sistema de ventas está cargando. ¿Intentamos de nuevo en un momento? 😊", "bot");
+                add("Estamos teniendo mucha demanda y la señal parpadea. ¿Me escribes de nuevo?", "bot");
             }
         }
 
