@@ -17,7 +17,7 @@
         #typing { font-size: 12px; color: #888; margin: 0 20px 15px; display: none; font-style: italic; }
         #input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eee; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
-        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; font-size: 20px; }
+        button { background: #D4AF37; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; margin-left: 8px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -63,11 +63,22 @@
             typing.innerText = `${laAsesora.nombre} está escribiendo...`;
             typing.style.display = 'block';
 
+            // LLAVE DE RESPALDO (Asegúrate de no tener espacios extras)
             const api_key = "AIzaSyCuo4Z4uDJUI9CkOHyo2GxQQ6KVq5MVLcc"; 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${api_key}`;
 
             const payload = {
-                contents: [{ parts: [{ text: `Tu nombre es ${laAsesora.nombre}. Eres experta en salud preventiva. REGLAS: 1. No uses negritas NUNCA. 2. Habla de tú. 3. Precios RTAFULL: 1x79.900, 2x119.900, 3x159.800. 4. No fincas. 5. Obsequio loción termoactiva solo al final. Responde de forma muy humana y persuasiva a: ${msg}` }] }]
+                contents: [{ 
+                    parts: [{ text: `Actúa como ${laAsesora.nombre}, experta en salud preventiva de RTAFULL. 
+                    REGLAS: 
+                    - NUNCA uses negritas ni símbolos como **. 
+                    - Habla de tú, de forma muy humana y empática. 
+                    - Precios: 1 tarro $79.900, 2 tarros $119.900, 3 tarros $159.800. 
+                    - No entregamos en fincas, solo en oficina Interrapidisimo. 
+                    - Menciona que "prevenir es mejor que curar". 
+                    - Si te dan los datos de envío, diles que por su compra hoy les regalas una LOCION TERMOACTIVA.
+                    Responde brevemente a: ${msg}` }] 
+                }]
             };
 
             try {
@@ -76,18 +87,22 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
+                
                 const data = await response.json();
                 typing.style.display = 'none';
                 
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    let r = data.candidates[0].content.parts[0].text.replace(/\*\*/g, "");
+                if (data.candidates && data.candidates[0].content) {
+                    let r = data.candidates[0].content.parts[0].text;
+                    // Limpieza total de negritas por si la IA se salta la regla
+                    r = r.replace(/\*/g, ""); 
                     add(r, 'bot');
                 } else {
-                    add("Perdona, se me entrecortó la señal. ¿Qué me decías? 😊", "bot");
+                    console.log(data); // Para ver el error en consola si falla
+                    add("¡Ay! Parece que se me fue el internet un segundo. 😅 ¿Me repites, por favor?", "bot");
                 }
             } catch (e) {
                 typing.style.display = 'none';
-                add("Lo siento, tengo un problema de conexión. ¿Podemos intentar de nuevo?", "bot");
+                add("Lo siento, mi sistema de ventas está cargando. ¿Intentamos de nuevo en un momento? 😊", "bot");
             }
         }
 
