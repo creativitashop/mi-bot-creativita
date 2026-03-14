@@ -26,15 +26,14 @@
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Dime qué producto buscas...">
+        <input type="text" id="in" placeholder="¿En qué puedo ayudarte hoy?">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
-        // Valores por defecto por si el post falla al enviar la info
-        let dPost = { id: "001", nombre: "nuestro tratamiento premium", precio: "139.900" };
-        let ciudadGuardada = "";
+        let dPost = { id: "", nombre: "", precio: "" };
+        let paso = 0;
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -42,13 +41,13 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // Captura agresiva de datos del post
+                // CAPTURA DE DATOS REALES DEL BLOG
                 const raw = e.data.info || "";
                 if(raw.includes("PRODUCTO_NOMBRE:")) dPost.nombre = raw.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
                 if(raw.includes("PRECIO_INDIVIDUAL:")) dPost.precio = raw.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Soy <b>${miAsesora.nombre}</b>, experta en salud preventiva. 🌿 Recuerda que <b>prevenir es mucho mejor que curar</b>. ¿Desde qué ciudad nos escribes para validar tu envío gratis?`, 'bot');
+                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>, experta en salud preventiva y belleza. Es un gusto saludarte. ¿En qué producto estás interesado el día de hoy para darte toda la información?`, 'bot');
                 }
             }
         });
@@ -62,22 +61,29 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // 1. PRIORIDAD: SALUDOS (Responder siempre si el usuario saluda)
-                if (m.match(/hola|buen|que tal|saludos|hi|buenas/)) {
-                    r = `¡Hola! Muy buen día. 😊 Es un gusto atenderte. Soy ${miAsesora.nombre}. ¿Te gustaría conocer los beneficios del <b>${dPost.nombre}</b> o prefieres que te confirme el precio de promoción?`;
+                // RESPUESTA SI SALUDAN DE NUEVO
+                if (m.match(/hola|buen|que tal/)) {
+                    r = `¡Hola de nuevo! 😊 Aquí sigo atenta para asesorarte. ¿Te interesa conocer más sobre el <b>${dPost.nombre}</b> o buscas algún otro beneficio para tu salud?`;
                 }
-                // 2. PRECIO (Asegurar que nunca salga vacío)
-                else if (m.match(/precio|cuanto|valor|costo|promocion/)) {
-                    r = `¡Claro que sí! Tu salud es lo primero. El <b>${dPost.nombre}</b> está hoy en solo **$${dPost.precio}**. 💰 Es una oferta limitada por 24 horas. ¿Te gustaría asegurar el tuyo ahora?`;
+                // RESPUESTA AL PRODUCTO ESPECÍFICO (TRAE VALORES CORRECTOS)
+                else if (m.includes("rtafull") || m.includes("colageno") || m.includes("rta full") || m.includes(dPost.nombre.toLowerCase())) {
+                    r = `¡Excelente elección! El <b>${dPost.nombre}</b> es clave en la salud preventiva. 🌿 Actualmente lo tenemos en promoción por solo **$${dPost.precio}**. ¿Te gustaría conocer sus beneficios principales o prefieres agendar el envío de una vez?`;
                 }
-                // 3. LOGÍSTICA / CIUDAD
-                else if (m.match(/bogota|medellin|cali|pereira|barranquilla|envio|donde/)) {
-                    ciudadGuardada = val;
-                    r = `¡Excelente! Tenemos cobertura en tu zona con **ENVÍO GRATIS** y pago contra-entrega. 🚚 ¿Deseas que agendemos tu pedido del <b>${dPost.nombre}</b> de una vez?`;
+                // PRECIO
+                else if (m.match(/precio|cuanto|valor|costo/)) {
+                    r = `Claro que sí, el valor del <b>${dPost.nombre}</b> es de **$${dPost.precio}** con envío gratis. 💰 ¿A qué ciudad te gustaría que lo enviáramos?`;
                 }
-                // 4. CIERRE PERSUASIVO POR DEFECTO
+                // CIUDAD
+                else if (m.match(/bogota|medellin|cali|pereira|barranquilla|envio/)) {
+                    r = `¡Súper! Tenemos cobertura total allá con pago contra-entrega. 🚚 Para procesar tu pedido del <b>${dPost.nombre}</b>, ¿me confirmas tu nombre y dirección completa?`;
+                }
+                // OTROS PRODUCTOS
+                else if (m.includes("otro") || m.includes("portafolio")) {
+                    r = "¡Nuestro portafolio es muy extenso! Manejamos diversas soluciones de salud y belleza. 💄 Cuéntame qué necesidad tienes y con gusto te doy la información exacta.";
+                }
+                // DEFAULT PERSUASIVO SIN NOMBRES GENÉRICOS
                 else {
-                    r = `Entiendo perfectamente. Mi misión como experta es ayudarte a prevenir antes que curar. 🌿 El <b>${dPost.nombre}</b> es la mejor inversión para tu bienestar. ¿Procedemos con los datos para tu envío por **$${dPost.precio}**?`;
+                    r = `Como experta, te confirmo que el <b>${dPost.nombre}</b> es la mejor inversión para prevenir antes que curar. ✨ ¿Deseas aprovechar el precio de **$${dPost.precio}** antes de que termine la promoción?`;
                 }
 
                 add(r, 'bot');
@@ -89,7 +95,6 @@
             const chat = document.getElementById('chat'); chat.appendChild(d);
             chat.scrollTop = chat.scrollHeight;
         }
-        document.getElementById('in').onkeypress = (e) => { if(e.key === 'Enter') send(); };
     </script>
 </body>
 </html>
