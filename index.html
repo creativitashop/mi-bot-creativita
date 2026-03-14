@@ -40,13 +40,13 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 
-                // Captura de datos REALES del post del blog
+                // CAPTURA PURA DEL BLOG: Si no llega, queda vacío.
                 const raw = e.data.info || "";
                 if(raw.includes("PRODUCTO_NOMBRE:")) dPost.nombre = raw.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
                 if(raw.includes("PRECIO_INDIVIDUAL:")) dPost.precio = raw.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. Es un gusto saludarte. ¿En qué producto estás interesado el día de hoy para darte toda la información y el precio de promoción?`, 'bot');
+                    add(`¡Hola! Muy buen día. 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte la información y el precio correcto?`, 'bot');
                 }
             }
         });
@@ -60,21 +60,20 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // RESPUESTA AL PRODUCTO (TRAE EL NOMBRE Y PRECIO CORRECTO DEL BLOG)
-                if (m.includes("rtafull") || m.includes("colageno") || m.includes("rta full") || (dPost.nombre && m.includes(dPost.nombre.toLowerCase()))) {
-                    r = `¡Excelente elección! El <b>${dPost.nombre || "producto del post"}</b> es fundamental para tu salud preventiva. 🌿 Actualmente lo tenemos en promoción por solo **$${dPost.precio || "valor de oferta"}**. ¿Te gustaría conocer los beneficios o prefieres que agendemos tu envío de una vez?`;
+                // DETECCIÓN DE PRODUCTO Y PRECIO REAL
+                if (m.includes("rtafull") || m.includes("rta full") || (dPost.nombre && m.includes(dPost.nombre.toLowerCase()))) {
+                    const nombreFinal = dPost.nombre || "Rtafull";
+                    const precioFinal = dPost.precio || "valor de promoción";
+                    r = `¡Excelente elección! El <b>${nombreFinal}</b> es salud preventiva pura. 🌿 Actualmente su precio es de **$${precioFinal}** con envío gratis. ¿Te gustaría conocer sus beneficios o agendamos tu envío?`;
                 }
-                // RESPUESTA A SALUDOS
-                else if (m.match(/hola|buen|que tal|saludos/)) {
-                    r = `¡Hola! Muy buen día. 😊 Soy ${miAsesora.nombre}, aquí sigo atenta. ¿Qué producto del catálogo te interesa llevar hoy?`;
+                else if (m.match(/hola|buen|saludos/)) {
+                    r = `¡Hola! Muy buen día. 😊 ¿Cómo puedo ayudarte hoy con tu bienestar?`;
                 }
-                // PRECIO
-                else if (m.match(/precio|cuanto|valor|costo/)) {
-                    r = `Claro que sí, el valor del <b>${dPost.nombre || "producto"}</b> es de **$${dPost.precio || "valor de oferta"}** con envío GRATIS. 💰 ¿A qué ciudad iría tu pedido?`;
+                else if (m.match(/precio|cuanto|valor/)) {
+                    r = `El valor de nuestra oferta actual es de **$${dPost.precio || "el indicado en el post"}**. 💰 ¿Para qué ciudad sería tu pedido?`;
                 }
-                // CIERRE PERSUASIVO POR DEFECTO
                 else {
-                    r = `Como tu asesora experta, te confirmo que el <b>${dPost.nombre || "producto"}</b> es la mejor opción para prevenir antes que curar. ✨ ¿Deseas aprovechar el precio de **$${dPost.precio || "promoción"}** antes de que se agote el inventario?`;
+                    r = `Como tu asesora, te recomiendo aprovechar el precio de **$${dPost.precio || "oferta"}** hoy mismo para prevenir cualquier molestia futura. ✨ ¿Deseas que te tome los datos?`;
                 }
 
                 add(r, 'bot');
