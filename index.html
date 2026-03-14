@@ -12,7 +12,7 @@
         .info h2 { margin: 0; font-size: 16px; color: #333; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #f9f9f9; }
         .msg { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14.5px; line-height: 1.4; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #eee; }
+        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #eee; color: #333; }
         .user { background: var(--dorado); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         #input-area { background: white; padding: 15px; display: flex; border-top: 1px solid #eee; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; font-size: 16px; }
@@ -26,32 +26,28 @@
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Dime qué producto buscas...">
+        <input type="text" id="in" placeholder="Escribe tu mensaje aquí...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
-        let infoCruda = ""; 
         let miAsesora = {}; 
-        let datosPost = { id: "", nombre: "", precio: "" };
+        let datosPost = { id: "", nombre: "nuestra oferta estrella", precio: "139.900" };
+        let faseConversacion = "inicio"; // inicio, dudas, cierre
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
-                infoCruda = e.data.info;
                 miAsesora = e.data.asesora;
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
 
-                // EXTRACCIÓN LÓGICA SIN EXCEPCIÓN
-                const lineas = infoCruda.split('\n');
-                lineas.forEach(l => {
-                    if(l.includes("ID_LOGISTICO:")) datosPost.id = l.split("ID_LOGISTICO:")[1].trim();
-                    if(l.includes("PRODUCTO_NOMBRE:")) datosPost.nombre = l.split("PRODUCTO_NOMBRE:")[1].trim();
-                    if(l.includes("PRECIO_INDIVIDUAL:")) datosPost.precio = l.split("PRECIO_INDIVIDUAL:")[1].trim();
-                });
+                const raw = e.data.info;
+                if(raw.includes("ID_LOGISTICO:")) datosPost.id = raw.split("ID_LOGISTICO:")[1].split("\n")[0].trim();
+                if(raw.includes("PRODUCTO_NOMBRE:")) datosPost.nombre = raw.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
+                if(raw.includes("PRECIO_INDIVIDUAL:")) datosPost.precio = raw.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Soy <b>${miAsesora.nombre}</b>. 😊 Bienvenida a nuestra tienda oficial. ¿Qué producto de nuestro catálogo te interesa llevar hoy?`, 'bot');
+                    add(`¡Hola! Soy <b>${miAsesora.nombre}</b>. 😊 Bienvenida a Creativita Shop. ¿En qué ciudad te encuentras hoy?`, 'bot');
                 }
             }
         });
@@ -65,26 +61,38 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // RESPUESTAS BASADAS EN DATOS REALES DEL POST
-                if (m.includes("precio") || m.includes("cuanto") || m.includes("valor") || m.includes("$")) {
-                    r = datosPost.precio ? `El precio especial para el <b>${datosPost.nombre}</b> es de **$${datosPost.precio}**. 💰 ¿Te gustaría que te lo separe?` : "El combo de oferta está en **$139.900**. ¿Te interesa este o buscas otro?";
+                // 1. LÓGICA DE SALUDO (HILO INICIAL)
+                if (m.match(/hola|buenos dias|buenas tardes|buenas noches|que tal|saludos/)) {
+                    r = `¡Hola! Qué gusto saludarte. Soy ${miAsesora.nombre}, tu asesora personal. Cuéntame, ¿te interesa el <b>${datosPost.nombre}</b> o buscas algo más?`;
+                    faseConversacion = "dudas";
                 } 
-                else if (m.includes("info") || m.includes("beneficios") || m.includes("sirve") || m.includes("detalles")) {
-                    r = `Claro que sí. El <b>${datosPost.nombre}</b> es ideal para tu bienestar. ¿Deseas que te explique cómo usarlo o prefieres confirmar el envío?`;
+                // 2. LÓGICA DE UBICACIÓN (RESPONDER AL "ESTOY EN...")
+                else if (m.match(/bogota|medellin|cali|pereira|en |soy de/)) {
+                    r = `¡Excelente! Tenemos cobertura total en tu zona. 🚚 Para el <b>${datosPost.nombre}</b> el precio es de **$${datosPost.precio}** con envío seguro. ¿Te gustaría que tomara tus datos?`;
+                    faseConversacion = "cierre";
                 }
-                else if (m.includes("id") || m.includes("codigo") || m.includes("logistico")) {
-                    r = `El código de este producto es <b>${datosPost.id}</b>. Es un producto original de nuestra bodega central. ✅`;
+                // 3. LÓGICA DE PRODUCTO Y PRECIO
+                else if (m.includes("precio") || m.includes("vale") || m.includes("costo") || m.includes("cuanto") || m.includes("$")) {
+                    r = `Claro que sí. El precio del <b>${datosPost.nombre}</b> es de **$${datosPost.precio}**. 💰 Es una oferta limitada. ¿Te parece un buen precio para comenzar tu tratamiento?`;
+                    faseConversacion = "dudas";
                 }
-                else if (m.includes("envio") || m.includes("ciudad") || m.includes("donde")) {
-                    r = "Hacemos envíos a toda Colombia. 🚚 Cuéntame en qué ciudad estás para confirmarte el tiempo de entrega.";
+                // 4. LÓGICA DE INFORMACIÓN TÉCNICA
+                else if (m.includes("sirve") || m.includes("info") || m.includes("beneficio") || m.includes("que es")) {
+                    r = `El <b>${datosPost.nombre}</b> es ideal para mejorar tu bienestar general. ✅ ¿Buscas algún resultado en particular para poder asesorarte mejor?`;
                 }
-                else if (m.includes("hola") || m.includes("buenas")) {
-                    r = `¡Hola! Un gusto saludarte. Soy ${miAsesora.nombre}. ¿Tienes alguna duda sobre el producto que estás viendo en este momento?`;
+                // 5. CONTINUIDAD (SI EL CLIENTE DICE "SI", "VALE", "OK")
+                else if (m.length < 5 && (m.includes("si") || m.includes("ok") || m.includes("dale") || m.includes("bueno"))) {
+                    if(faseConversacion === "cierre") {
+                        r = "¡Perfecto! Para agendar tu pedido necesito: Nombre completo, Dirección y Teléfono. 😊";
+                    } else {
+                        r = `¡Súper! ¿Te parece si confirmamos el pedido del <b>${datosPost.nombre}</b> por **$${datosPost.precio}**?`;
+                    }
                 }
+                // 6. RESPUESTA POR DEFECTO PERO CON CONTEXTO
                 else {
-                    // Respuesta dinámica para no repetir lo mismo de las fotos
-                    r = `Entiendo. Como tu asesora, estoy aquí para que lleves lo mejor. ¿Quieres que hablemos del **${datosPost.nombre || 'combo en promoción'}** o buscas algo diferente?`;
+                    r = `Entiendo. Como tu asesora, mi meta es que aproveches el <b>${datosPost.nombre}</b> hoy mismo. ¿Tienes alguna duda sobre el pago o el envío a tu ciudad?`;
                 }
+
                 add(r, 'bot');
             }, 800);
         }
