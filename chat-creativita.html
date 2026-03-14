@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Inteligente Creativita Shop</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: transparent; display: flex; justify-content: center; }
+        #chat-window { width: 100%; max-width: 350px; height: 480px; background: #fff; border: 2px solid #D4AF37; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #header { background: #D4AF37; color: white; padding: 12px; display: flex; align-items: center; gap: 10px; }
+        #header img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fdfbf7; }
+        .msg { padding: 10px 14px; border-radius: 15px; font-size: 13.5px; line-height: 1.4; max-width: 85%; }
+        .bot { background: white; border: 1px solid #eee; align-self: flex-start; color: #333; }
+        .user { background: #D4AF37; color: white; align-self: flex-end; }
+        #input-area { padding: 10px; display: flex; background: white; border-top: 1px solid #eee; }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; font-size: 13px; }
+        button { background: #D4AF37; border: none; color: white; border-radius: 50%; width: 35px; height: 35px; margin-left: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .typing { font-size: 11px; color: #888; font-style: italic; margin-left: 15px; margin-bottom: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="chat-window">
+    <div id="header">
+        <img id="ia-img" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp">
+        <div>
+            <div id="ia-name" style="font-weight:bold; font-size:14px;">Asesora Dayana</div>
+            <div style="font-size:10px; opacity:0.9;">Analista de Bienestar</div>
+        </div>
+    </div>
+    <div id="messages">
+        <div class="msg bot">¡Hola! Soy tu asistente de Creativita Shop. He analizado nuestro catálogo por familias (Salud, Articular, Energía). ¿Qué producto te interesa o qué duda tienes sobre precios?</div>
+    </div>
+    <div id="typing" class="typing">Analizando base de datos...</div>
+    <div id="input-area">
+        <input type="text" id="user-in" placeholder="Pregúntame lo que sea...">
+        <button onclick="enviar()">🚀</button>
+    </div>
+</div>
+
+<script>
+    const apiKey = "AIzaSyCgN-AHpuo8nuP8mGGviF8-UMMuB48uwys";
+
+    async function enviar() {
+        const inp = document.getElementById('user-in');
+        const txt = inp.value.trim();
+        if(!txt) return;
+
+        addMsg(txt, 'user');
+        inp.value = '';
+        document.getElementById('typing').style.display = 'block';
+
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: `Eres una asesora experta de Creativita Shop. Responde con profundidad analizando familias de productos (Salud articular, Digestiva, Energía, etc.). Si el usuario pregunta por precios, sé vendedora y ofrece beneficios adicionales que no siempre están en el post. Sé muy amable y profesional. Responde a: ${txt}` }] }]
+                })
+            });
+            const d = await res.json();
+            const botRes = d.candidates[0].content.parts[0].text;
+            document.getElementById('typing').style.display = 'none';
+            addMsg(botRes, 'bot');
+        } catch (e) {
+            document.getElementById('typing').style.display = 'none';
+            addMsg("Tuve un pequeño error en la conexión de análisis. ¿Podrías repetirme la pregunta?", 'bot');
+        }
+    }
+
+    function addMsg(t, s) {
+        const b = document.getElementById('messages');
+        const d = document.createElement('div');
+        d.className = `msg ${s}`;
+        d.innerText = t;
+        b.appendChild(d);
+        b.scrollTop = b.scrollHeight;
+    }
+
+    document.getElementById('user-in').onkeypress = (e) => { if(e.keyCode === 13) enviar(); };
+</script>
+
+</body>
+</html>
