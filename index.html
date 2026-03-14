@@ -26,16 +26,18 @@
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Escribe aquí...">
+        <input type="text" id="in" placeholder="Dime qué producto buscas...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
+        // PRECIOS DE RESPALDO (Si el blog no envía nada, usa estos)
         let dPost = { 
-            nombre: "Colágeno", 
+            nombre: "nuestro producto premium", 
             precio: "85.000",
             rtafull: "79.900",
+            coliplus: "85.000",
             tyruss: "95.000"
         };
 
@@ -44,14 +46,17 @@
                 miAsesora = e.data.asesora;
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
-
-                // Captura opcional del post
-                const raw = (e.data.info || "").replace(/\s+/g, " ");
-                const pMatch = raw.match(/PRECIO_INDIVIDUAL:\s*(\d+)/i);
+                
+                // Intento leer lo que viene del blog
+                const infoBlog = (e.data.info || "").replace(/\s+/g, " ");
+                const pMatch = infoBlog.match(/PRECIO_INDIVIDUAL:\s*(\d+)/i);
+                const nMatch = infoBlog.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|$)/i);
+                
                 if(pMatch) dPost.precio = pMatch[1];
+                if(nMatch) dPost.nombre = nMatch[1].trim();
 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio de oferta hoy?`, 'bot');
+                    add(`¡Hola! 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado hoy para darte el precio de oferta?`, 'bot');
                 }
             }
         });
@@ -64,18 +69,21 @@
             setTimeout(() => {
                 const m = val.toLowerCase();
                 let r = "";
-                
+
                 if (m.includes("rtafull") || m.includes("rta full")) {
                     r = `El <b>Rtafull</b> está en promoción por **$${dPost.rtafull}** hoy mismo. 🌿 Incluye envío gratis y pago contra-entrega. ¿Te gustaría agendarlo?`;
-                } else if (m.includes("tyruss")) {
-                    r = `El <b>Tyruss Full</b> tiene un valor de **$${dPost.tyruss}**. 💰 Es excelente para tus objetivos. ¿A qué ciudad sería el envío?`;
-                } else if (m.includes("colageno") || m.includes("precio") || m.includes("cuanto") || m.includes("valor")) {
-                    r = `El precio del <b>${dPost.nombre}</b> es de **$${dPost.precio}** con envío GRATIS. 🎁 ¿Deseas que tome tus datos para la entrega?`;
-                } else {
-                    r = `Como tu asesora, te recomiendo aprovechar nuestras ofertas en <b>Rtafull ($${dPost.rtafull})</b> o <b>Colágeno ($${dPost.precio})</b>. ¿Cuál prefieres? ✨`;
+                } 
+                else if (m.includes("coliplus") || m.includes("colipus")) {
+                    r = `El <b>Coliaplus</b> tiene un valor de **$${dPost.coliplus}** con envío gratis. 💰 ¡Es excelente! ¿Para qué ciudad sería el envío?`;
+                }
+                else if (m.includes("precio") || m.includes("cuanto") || m.includes("valor") || m.includes("colageno")) {
+                    r = `Claro que sí. El <b>${dPost.nombre}</b> tiene un valor de **$${dPost.precio}** hoy. 🎁 Incluye envío gratis y pago contra-entrega. ¿Te tomo los datos?`;
+                } 
+                else {
+                    r = `Como tu asesora, te recomiendo aprovechar nuestras ofertas en <b>Rtafull</b> o <b>Colágeno</b>. ¿Cuál de los dos te interesa más? ✨`;
                 }
                 add(r, 'bot');
-            }, 500);
+            }, 600);
         }
 
         function add(t, c) {
