@@ -10,48 +10,48 @@
         #avatar { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--dorado); object-fit: cover; }
         .info { margin-left: 12px; }
         .info h2 { margin: 0; font-size: 16px; color: #333; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14.5px; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #ddd; }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #f9f9f9; }
+        .msg { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14.5px; line-height: 1.4; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .bot { background: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #eee; }
         .user { background: var(--dorado); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         #input-area { background: white; padding: 15px; display: flex; border-top: 1px solid #eee; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; font-size: 16px; }
-        button { background: var(--dorado); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; margin-left: 10px; cursor: pointer; font-size: 20px; }
+        button { background: var(--dorado); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; margin-left: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div id="header">
         <img src="" id="avatar">
-        <div class="info"><h2 id="nom">Asesora</h2><span style="color:#28a745; font-size:11px; font-weight:bold;">● En línea ahora</span></div>
+        <div class="info"><h2 id="nom">Asesora</h2><span style="color:#28a745; font-size:11px; font-weight:bold;">● En línea</span></div>
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Dime qué buscas hoy...">
+        <input type="text" id="in" placeholder="Dime qué producto buscas...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
-        let dbFull = ""; let miAsesora = {}; let bienvenida = false;
-        let datosExtraidos = { nombre: "", precio: "", id: "" };
+        let infoCruda = ""; 
+        let miAsesora = {}; 
+        let datosPost = { id: "", nombre: "", precio: "" };
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
-                dbFull = e.data.info;
+                infoCruda = e.data.info;
                 miAsesora = e.data.asesora;
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
 
-                // ANALIZAR CÓDIGO OCULTO SIN EXCEPCIÓN
-                if(dbFull.includes("PRODUCTO_NOMBRE:")) {
-                    datosExtraidos.nombre = dbFull.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
-                }
-                if(dbFull.includes("PRECIO_INDIVIDUAL:")) {
-                    datosExtraidos.precio = dbFull.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
-                }
-                
-                if(!bienvenida) {
-                    add(`¡Hola! Soy <b>${miAsesora.nombre}</b>. 😊 Estoy lista para asesorarte. <b>¿Qué producto te interesa llevar hoy?</b>`, 'bot');
-                    bienvenida = true;
+                // EXTRACCIÓN LÓGICA SIN EXCEPCIÓN
+                const lineas = infoCruda.split('\n');
+                lineas.forEach(l => {
+                    if(l.includes("ID_LOGISTICO:")) datosPost.id = l.split("ID_LOGISTICO:")[1].trim();
+                    if(l.includes("PRODUCTO_NOMBRE:")) datosPost.nombre = l.split("PRODUCTO_NOMBRE:")[1].trim();
+                    if(l.includes("PRECIO_INDIVIDUAL:")) datosPost.precio = l.split("PRECIO_INDIVIDUAL:")[1].trim();
+                });
+
+                if(!document.getElementById('chat').innerHTML) {
+                    add(`¡Hola! Soy <b>${miAsesora.nombre}</b>. 😊 Bienvenida a nuestra tienda oficial. ¿Qué producto de nuestro catálogo te interesa llevar hoy?`, 'bot');
                 }
             }
         });
@@ -65,22 +65,25 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // LÓGICA BASADA EN EL CÓDIGO DEL POST
-                if (m.includes("tyruss") || m.includes("colageno") || m.includes("quemador") || m.includes("combo") || m.includes("info")) {
-                    if(datosExtraidos.nombre) {
-                        r = `¡Claro! El <b>${datosExtraidos.nombre}</b> es excelente. Su precio es de **$${datosExtraidos.precio}**. 💰 ¿Te gustaría que te lo enviemos a tu ciudad?`;
-                    } else {
-                        r = "Tenemos varias promociones de salud y bienestar. ¿Buscas el combo de Tyruss y Colágeno de $139.900?";
-                    }
+                // RESPUESTAS BASADAS EN DATOS REALES DEL POST
+                if (m.includes("precio") || m.includes("cuanto") || m.includes("valor") || m.includes("$")) {
+                    r = datosPost.precio ? `El precio especial para el <b>${datosPost.nombre}</b> es de **$${datosPost.precio}**. 💰 ¿Te gustaría que te lo separe?` : "El combo de oferta está en **$139.900**. ¿Te interesa este o buscas otro?";
                 } 
-                else if (m.includes("precio") || m.includes("cuanto") || m.includes("valor")) {
-                    r = datosExtraidos.precio ? `El precio especial es de **$${datosExtraidos.precio}**. 💸 ¿A qué ciudad sería el envío?` : "El combo de oferta está en **$139.900**. ¿Te interesa?";
+                else if (m.includes("info") || m.includes("beneficios") || m.includes("sirve") || m.includes("detalles")) {
+                    r = `Claro que sí. El <b>${datosPost.nombre}</b> es ideal para tu bienestar. ¿Deseas que te explique cómo usarlo o prefieres confirmar el envío?`;
+                }
+                else if (m.includes("id") || m.includes("codigo") || m.includes("logistico")) {
+                    r = `El código de este producto es <b>${datosPost.id}</b>. Es un producto original de nuestra bodega central. ✅`;
                 }
                 else if (m.includes("envio") || m.includes("ciudad") || m.includes("donde")) {
-                    r = "Realizamos envíos seguros a toda Colombia con pago contra entrega en muchas ciudades. 🚚 ¿En qué ciudad te encuentras?";
+                    r = "Hacemos envíos a toda Colombia. 🚚 Cuéntame en qué ciudad estás para confirmarte el tiempo de entrega.";
+                }
+                else if (m.includes("hola") || m.includes("buenas")) {
+                    r = `¡Hola! Un gusto saludarte. Soy ${miAsesora.nombre}. ¿Tienes alguna duda sobre el producto que estás viendo en este momento?`;
                 }
                 else {
-                    r = `Entiendo perfectamente. Como tu asesora ${miAsesora.nombre}, te recomiendo llevar nuestra oferta principal. ¿Quieres que te tome los datos o tienes otra duda?`;
+                    // Respuesta dinámica para no repetir lo mismo de las fotos
+                    r = `Entiendo. Como tu asesora, estoy aquí para que lleves lo mejor. ¿Quieres que hablemos del **${datosPost.nombre || 'combo en promoción'}** o buscas algo diferente?`;
                 }
                 add(r, 'bot');
             }, 800);
