@@ -5,36 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         :root { --dorado: #D4AF37; --fondo: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--fondo); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--fondo); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         #header { background: white; padding: 12px; display: flex; align-items: center; border-bottom: 3px solid var(--dorado); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         #avatar { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--dorado); object-fit: cover; }
         .info { margin-left: 12px; }
         .info h2 { margin: 0; font-size: 16px; color: #333; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #ffffff; }
-        .msg { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14.5px; line-height: 1.4; }
+        .msg { padding: 12px 16px; border-radius: 18px; max-width: 85%; font-size: 14.5px; line-height: 1.4; position: relative; }
         .bot { background: #f1f0f0; align-self: flex-start; border-bottom-left-radius: 2px; color: #1c1e21; }
         .user { background: var(--dorado); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        #input-area { background: white; padding: 15px; display: flex; border-top: 1px solid #eee; }
+        #input-area { background: white; padding: 15px; display: flex; border-top: 1px solid #eee; align-items: center; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; font-size: 16px; }
-        button { background: var(--dorado); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; margin-left: 10px; cursor: pointer; }
+        button { background: var(--dorado); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; margin-left: 10px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        button:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
     <div id="header">
         <img src="" id="avatar">
-        <div class="info"><h2 id="nom">Asesora Experta</h2><span style="color:#28a745; font-size:11px; font-weight:bold;">● En línea</span></div>
+        <div class="info"><h2 id="nom">Asesora Experta</h2><span style="color:#28a745; font-size:11px; font-weight:bold;">● En línea - Respuesta inmediata</span></div>
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Escribe tu mensaje aquí...">
+        <input type="text" id="in" placeholder="Escribe tu duda aquí...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
         let miAsesora = {}; 
-        let datosPost = { id: "", nombre: "nuestro producto premium", precio: "" };
-        let pedido = { nombre: "", ciudad: "", direccion: "", barrio: "", telefono: "", fechaProg: "" };
-        let paso = 0;
+        let dPost = { id: "", nombre: "nuestro tratamiento estrella", precio: "139.900" };
+        let pedido = { nombre: "", tel: "", ciudad: "", dir: "", barrio: "", fecha: "", oficina: false };
+        let fase = "saludo"; // saludo, info, precio, datos, confirmacion
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
@@ -42,20 +43,22 @@
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
                 const raw = e.data.info;
-                if(raw.includes("PRODUCTO_NOMBRE:")) datosPost.nombre = raw.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
-                if(raw.includes("PRECIO_INDIVIDUAL:")) datosPost.precio = raw.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
+                if(raw.includes("PRODUCTO_NOMBRE:")) dPost.nombre = raw.split("PRODUCTO_NOMBRE:")[1].split("\n")[0].trim();
+                if(raw.includes("PRECIO_INDIVIDUAL:")) dPost.precio = raw.split("PRECIO_INDIVIDUAL:")[1].split("\n")[0].trim();
                 
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! Un gusto saludarte. Soy <b>${miAsesora.nombre}</b>, experta en salud preventiva y bienestar. 🌿 Invertir en tu salud hoy es evitar enfermedades mañana. ¿A qué ciudad va tu pedido?`, 'bot');
+                    add(`¡Hola! Un gusto saludarte. Soy <b>${miAsesora.nombre}</b>, experta en cuidado personal y salud preventiva. 🌿 En este blog creemos que <b>prevenir es mucho mejor que curar</b>, ¿verdad? Para darte una asesoría perfecta, ¿a qué ciudad iría tu pedido?`, 'bot');
                 }
             }
         });
 
-        function getDespedida() {
+        function getCierre() {
             const h = new Date().getHours();
-            if (h >= 0 && h < 12) return "¡Que tengas un excelente día! ☀️";
-            if (h >= 12 && h < 19) return "¡Que tengas una excelente tarde! 🌤️";
-            return "¡Que tengas una excelente noche! ✨";
+            let d = "";
+            if(h >= 0 && h < 12) d = "Que tengas un excelente día";
+            else if(h >= 12 && h < 19) d = "Que tengas una excelente tarde";
+            else d = "Que tengas una excelente noche";
+            return `✨ ${d}.`;
         }
 
         function send() {
@@ -67,42 +70,66 @@
                 const m = val.toLowerCase();
                 let r = "";
 
-                // LÓGICA DE UBICACIÓN Y BODEGAS
-                if (m.includes("ubicacion") || m.includes("donde estan") || m.includes("donde quedan")) {
-                    r = "Tenemos nuestra bodega principal en la ciudad de Medellín y bodegas satélite en puntos estratégicos para optimizar la logística. 📦 Entregamos en el 95% del territorio nacional. ¿En qué ciudad te encuentras para validar cobertura?";
+                // 1. GESTIÓN DE CIUDAD Y LOGÍSTICA
+                if (fase === "saludo" || m.match(/bogota|medellin|cali|pereira|barranquilla|bucaramanga|envio|ciudad/)) {
+                    if(!pedido.ciudad) {
+                        pedido.ciudad = val;
+                        r = `¡Perfecto! Te confirmo que para tu ubicación tenemos <b>ENVÍO GRATIS</b> y pago contra-entrega. 🎁 ¿Deseas conocer cómo el ${dPost.nombre} va a transformar tu salud preventiva hoy?`;
+                        fase = "info";
+                    }
                 }
-                // PRECIO Y PROMOCIÓN (Gatillo de Escasez)
-                else if (m.includes("precio") || m.includes("cuanto") || m.includes("promocion")) {
-                    r = `¡Aprovecha hoy mismo! El <b>${datosPost.nombre}</b> está en promoción por solo **$${datosPost.precio}**. 💸 Esta oferta termina en 24 horas o hasta agotar existencias. ¿Te gustaría asegurar el tuyo antes de que se agoten?`;
+
+                // 2. BENEFICIOS (PNL)
+                if (m.match(/si|como funciona|beneficios|sirve|detalles/)) {
+                    r = `El <b>${dPost.nombre}</b> no es solo un producto, es un escudo para tu salud. 🛡️ Actúa desde la prevención, fortaleciendo tu organismo y dándote la vitalidad que mereces. ¿Te gustaría saber el precio especial de promoción que tenemos solo por 24 horas?`;
+                    fase = "precio";
                 }
-                // TIEMPOS DE ENTREGA
-                else if (m.includes("demora") || m.includes("cuanto tarda")) {
-                    r = "En ciudades principales entregamos entre 2 y 4 días hábiles; para el resto del país, entre 3 y 5 días. 🚚 Siempre días hábiles. ¿Para qué ciudad sería?";
+
+                // 3. PRECIO (DADO ANTES QUE LOS DATOS)
+                else if (m.match(/precio|cuanto|valor|costo/) || fase === "precio") {
+                    r = `¡Esta es la mejor parte! Tu salud no tiene precio, pero hoy el <b>${dPost.nombre}</b> está en promoción por solo **$${dPost.precio}**. 💰 Es una oportunidad única porque la oferta se acaba en 24 horas o hasta agotar inventario. ¿Aseguramos tu pedido de una vez?`;
+                    fase = "datos";
                 }
-                // TRATAMIENTO DE DATOS (Recolección proactiva)
-                else if (m.includes("bogota") || m.includes("medellin") || m.includes("cali") || m.includes("barranquilla") || m.includes("pereira")) {
-                    pedido.ciudad = val;
-                    r = "¡Perfecto! Te confirmo que tenemos **ENVÍO GRATIS** y pago contra-entrega. 🎁 ¿Deseas conocer todos los beneficios de salud preventiva que este producto tiene para ti?";
+
+                // 4. UBICACIÓN FÍSICA
+                else if (m.includes("donde estan") || m.includes("donde quedan") || m.includes("ubicacion")) {
+                    r = "Nuestra bodega principal está en Medellín y contamos con bodegas satélite estratégicas. ✅ Entregamos en el 95% de Colombia, ¡en otros países aún no! ¿Procedemos con tu orden?";
                 }
-                // CASO RURAL / FINCAS
-                else if (m.includes("finca") || m.includes("vereda") || m.includes("rural")) {
-                    r = "Por seguridad de las transportadoras no entregamos en zonas rurales o fincas directamente, pero podemos enviarlo a la oficina de **INTERRAPIDISIMO** más cercana donde reclamas y pagas al recibir. 🏢 ¿Te parece bien?";
+
+                // 5. ZONA RURAL / FINCA
+                else if (m.match(/finca|vereda|rural/)) {
+                    pedido.oficina = true;
+                    r = "Entiendo. Por seguridad no entregamos en zonas rurales o fincas, pero podemos enviarlo a la oficina de <b>INTERRAPIDISIMO</b> más cercana para que reclames y pagues allí. 🏢 ¿Te parece bien?";
                 }
-                // CIERRE / DATOS DE PEDIDO
-                else if (m.includes("quiero") || m.includes("pedido") || m.includes("comprar") || m.includes("datos")) {
-                    r = `¡Excelente decisión por tu salud! 🌿 Para agendar necesito: \n☑️ Nombres y Apellidos \n☑️ Teléfono \n☑️ Dirección y Barrio (si es ciudad). \n\n¿Me los compartes para cargar la orden?`;
+
+                // 6. OBJECIÓN DE DINERO (VENTA PROGRAMADA)
+                else if (m.match(/dinero|plata|sueldo|pago luego/)) {
+                    r = "¡No dejes tu salud para después! Podemos hacer una <b>venta programada</b>. 🗓️ Dime exactamente qué día podrías recibirlo y te lo agendamos. ¿Qué fecha te queda mejor?";
                 }
-                // OBJECIÓN DINERO / PROGRAMACIÓN
-                else if (m.includes("dinero") || m.includes("plata") || m.includes("sueldo") || m.includes("pago despues")) {
-                    r = "¡No te preocupes! Podemos realizar una **venta programada**. 🗓️ Dime para qué fecha exacta podrías recibir el pedido y te lo agendamos para ese día. ¿Qué fecha te queda mejor?";
+
+                // 7. OTROS PRODUCTOS
+                else if (m.includes("otro") || m.includes("portafolio") || m.includes("venden mas")) {
+                    r = "¡Nuestro portafolio es extensísimo! Manejamos toda la línea de salud y belleza. 💄 ¿Qué necesidad específica tienes hoy para ayudarte?";
                 }
-                // DEFAULT / PERSUASIÓN
+
+                // 8. CIERRE Y CAPTURA DE DATOS
+                else if (fase === "datos" || m.includes("pedido") || m.includes("comprar")) {
+                    r = `¡Excelente elección! Para tu seguridad, confírmame: \n☑️ Nombre completo \n☑️ Teléfono \n☑️ Dirección y Barrio (si es ciudad principal). \n\n¡Estoy lista para cargar tu orden! 🚀`;
+                    fase = "confirmacion";
+                }
+
+                // FINALIZACIÓN AMABLE
+                else if (m.match(/gracias|adios|chao|luego/)) {
+                    r = `Fue un placer asesorarte. Recuerda que tu salud preventiva es la prioridad. ${getCierre()}`;
+                }
+
+                // DEFAULT PERSUASIVO
                 else {
-                    r = `Entiendo perfectamente. Recuerda que prevenir es mucho mejor que curar y el <b>${datosPost.nombre}</b> es tu mejor aliado. ✨ ¿Deseas que agendemos tu pedido ahora o tienes alguna duda específica sobre los beneficios?`;
+                    r = `Como experta, te recomiendo no esperar a que el síntoma aparezca. 🌿 Aprovecha la promoción del <b>${dPost.nombre}</b> por $${dPost.precio}. ¿Tienes alguna duda final o cerramos tu envío?`;
                 }
 
                 add(r, 'bot');
-            }, 800);
+            }, 900);
         }
 
         function add(t, c) {
