@@ -1,38 +1,52 @@
-async function send() {
-            const input = document.getElementById('in');
-            const val = input.value.trim();
-            if(!val) return;
-            
-            add(val, 'user');
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Carolina</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 10px; background: #fff; }
+        #chat-box { height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; }
+        .msg { margin: 5px 0; padding: 8px 12px; border-radius: 15px; max-width: 80%; }
+        .user { background: #D4AF37; color: white; align-self: flex-end; }
+        .bot { background: #f1f1f1; color: #333; align-self: flex-start; }
+        #input-area { display: flex; gap: 5px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; }
+        button { background: #D4AF37; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="chat-box"></div>
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="Escribe tu duda sobre RtaFull...">
+        <button onclick="sendMsg()">Enviar</button>
+    </div>
+
+    <script>
+        const WORKER_URL = 'https://mi-bot-creativita.creativitashopcoloficial.workers.dev/';
+
+        async function sendMsg() {
+            const input = document.getElementById('user-input');
+            const box = document.getElementById('chat-box');
+            if(!input.value) return;
+
+            const val = input.value;
+            box.innerHTML += `<div class="msg user">${val}</div>`;
             input.value = '';
 
             try {
-                // Aquí está el truco: Mandamos el mensaje exacto que espera su Cloudflare
-                const response = await fetch(WORKER_URL, {
+                const res = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mensaje: PROMPT_VENTAS + "\n\nCliente dice: " + val })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ mensaje: val })
                 });
-
-                const data = await response.json();
-                
-                // Revisamos si la IA nos contestó bien
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    const rtaIA = data.candidates[0].content.parts[0].text;
-                    add(rtaIA, 'bot');
-                    
-                    // Si la respuesta es larga o pide datos, mostramos el botón de WhatsApp
-                    if(rtaIA.toLowerCase().includes("datos") || rtaIA.toLowerCase().includes("nombre") || rtaIA.length > 60) {
-                        addWA();
-                    }
-                } else {
-                    throw new Error("Respuesta vacía de la IA");
-                }
-
+                const data = await res.json();
+                const rta = data.candidates[0].content.parts[0].text;
+                box.innerHTML += `<div class="msg bot">${rta}</div>`;
             } catch (e) {
-                console.error("Error:", e);
-                // Si falla, mostramos el mensaje de auxilio con el botón de WhatsApp
-                add("¡Hola! 😊 Estamos recibiendo muchos pedidos en este momento. Dale clic al botón de abajo para atenderte personalmente por WhatsApp y darte el descuento.", "bot");
-                addWA();
+                box.innerHTML += `<div class="msg bot">Carolina está descansando, intenta en un momento.</div>`;
             }
+            box.scrollTop = box.scrollHeight;
         }
+    </script>
+</body>
+</html>
