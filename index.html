@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        :root { --dorado: #D4AF37; --fondo: #f0f2f5; }
+        :root { --dorado: #D4AF37; --azul: #051e3e; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         #header { background: white; padding: 12px; display: flex; align-items: center; border-bottom: 2px solid var(--dorado); }
         #avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--dorado); }
         .info { margin-left: 10px; }
         .info h2 { margin: 0; font-size: 15px; color: #333; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 14px; border-radius: 15px; max-width: 85%; font-size: 14px; line-height: 1.4; }
-        .bot { background: #f0f0f0; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .user { background: var(--dorado); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        #input-area { padding: 10px; display: flex; border-top: 1px solid #eee; }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #f9f9f9; }
+        .msg { padding: 10px 14px; border-radius: 15px; max-width: 85%; font-size: 14px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .bot { background: white; align-self: flex-start; border-left: 4px solid var(--dorado); }
+        .user { background: var(--dorado); color: white; align-self: flex-end; }
+        .btn-wa { background: #28a745; color: white; text-decoration: none; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-top: 5px; display: block; }
+        #input-area { padding: 10px; display: flex; background: white; border-top: 1px solid #eee; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 10px 15px; outline: none; }
         button { background: var(--dorado); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; margin-left: 5px; cursor: pointer; }
     </style>
@@ -22,61 +23,80 @@
 <body>
     <div id="header">
         <img src="" id="avatar">
-        <div class="info"><h2 id="nom">Asesora</h2><span style="color:#28a745; font-size:10px;">● En línea</span></div>
+        <div class="info"><h2 id="nom">Carolina</h2><span style="color:#28a745; font-size:10px;">● Especialista en Ventas</span></div>
     </div>
     <div id="chat"></div>
     <div id="input-area">
-        <input type="text" id="in" placeholder="Escribe tu mensaje...">
+        <input type="text" id="in" placeholder="Pregúntame lo que necesites...">
         <button onclick="send()">🚀</button>
     </div>
 
     <script>
-        let miAsesora = {}; 
-        let dPost = { nombre: "el producto", precio: "85.000", rtafull: "79.900" };
+        let miAsesora = {};
+        const WORKER_URL = "https://tiny-cloud-4692.creativita-110.workers.dev";
+
+        const PROMPT_VENTAS = `Eres Carolina, vendedora experta de Creativita Shop. 
+        Misión: Cerrar ventas con Pago Contra Entrega y Envío Gratis. 
+        Productos: Rtafull ($79.900), Colágeno ($85.000), Coliplus ($85.000). 
+        Si el cliente está interesado, SIEMPRE pide: Nombre, Ciudad, Dirección y Teléfono.`;
 
         window.addEventListener("message", (e) => {
             if (e.data.tipo === "CONFIG") {
                 miAsesora = e.data.asesora;
                 document.getElementById('avatar').src = miAsesora.foto;
                 document.getElementById('nom').innerText = miAsesora.nombre;
-                
-                const raw = (e.data.info || "").replace(/\s+/g, " ");
-                const pMatch = raw.match(/PRECIO_INDIVIDUAL:\s*(\d+)/i);
-                const nMatch = raw.match(/PRODUCTO_NOMBRE:\s*(.+?)(?=PRECIO_INDIVIDUAL|$)/i);
-                
-                if(pMatch) dPost.precio = pMatch[1];
-                if(nMatch) dPost.nombre = nMatch[1].trim();
-
                 if(!document.getElementById('chat').innerHTML) {
-                    add(`¡Hola! 😊 Soy <b>${miAsesora.nombre}</b>. ¿En qué producto estás interesado para darte el precio de oferta?`, 'bot');
+                    add(`¡Hola! 😊 Soy <b>${miAsesora.nombre}</b> de Creativita Shop. ¿Cómo puedo ayudarte con tu pedido hoy?`, 'bot');
                 }
             }
         });
 
-        function send() {
+        async function send() {
             const val = document.getElementById('in').value.trim();
             if(!val) return;
-            add(val, 'user'); document.getElementById('in').value = '';
-            
-            setTimeout(() => {
-                const m = val.toLowerCase();
-                let r = "";
-                if (m.includes("rtafull") || m.includes("rta full")) {
-                    r = `El <b>Rtafull</b> está hoy en promoción por **$${dPost.rtafull}** con envío gratis. 🌿 ¿Te gustaría agendarlo?`;
-                } else if (m.match(/precio|cuanto|valor|vale/)) {
-                    r = `El valor del <b>${dPost.nombre}</b> es de **$${dPost.precio}** hoy mismo con envío incluido. 💰 ¿Para qué ciudad sería el envío?`;
-                } else {
-                    r = `¡Excelente! El <b>${dPost.nombre}</b> es de lo mejor para tu bienestar. El precio de hoy es **$${dPost.precio}**. ¿Deseas aprovechar la oferta? ✨`;
+            add(val, 'user');
+            document.getElementById('in').value = '';
+
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensaje: PROMPT_VENTAS + "\nCliente: " + val })
+                });
+
+                const data = await response.json();
+                const rtaIA = data.candidates[0].content.parts[0].text;
+                add(rtaIA, 'bot');
+
+                if(rtaIA.toLowerCase().includes("datos") || rtaIA.length > 70) {
+                    addWA();
                 }
-                add(r, 'bot');
-            }, 600);
+            } catch (e) {
+                add("Disculpa, tengo muchos pedidos. Dale clic abajo para atenderte por WhatsApp rápido.", "bot");
+                addWA();
+            }
         }
 
         function add(t, c) {
-            const d = document.createElement('div'); d.className = 'msg ' + c; d.innerHTML = t;
-            const chat = document.getElementById('chat'); chat.appendChild(d);
+            const d = document.createElement('div'); 
+            d.className = 'msg ' + c; 
+            d.innerHTML = t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            const chat = document.getElementById('chat');
+            chat.appendChild(d);
             chat.scrollTop = chat.scrollHeight;
         }
+
+        function addWA() {
+            if(document.getElementById('wa-btn')) return;
+            const a = document.createElement('a');
+            a.id = 'wa-btn';
+            a.className = 'btn-wa';
+            a.href = "https://wa.me/57TU_TELEFONO_AQUI?text=Hola, quiero confirmar mi pedido";
+            a.target = "_blank";
+            a.innerText = "✅ FINALIZAR PEDIDO POR WHATSAPP";
+            document.getElementById('chat').appendChild(a);
+        }
+
         document.getElementById('in').onkeypress = (e) => { if(e.key === 'Enter') send(); };
     </script>
 </body>
