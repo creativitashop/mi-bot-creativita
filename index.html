@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <style>
         body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #fff; overflow: hidden; }
-        .header { background: #D4AF37; color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .header { background: #D4AF37; color: white; padding: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .avatar-box { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; overflow: hidden; background: #eee; flex-shrink: 0; }
         .avatar { width: 100%; height: 100%; object-fit: cover; }
         .info { display: flex; flex-direction: column; }
@@ -31,10 +31,7 @@
     <script>
         const equipo = [
             {n: "Valentina", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp"},
-            {n: "Dayana", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4EJO6iV4Z-Itf2sYYwuqldfLYxibew0bjGGlCatlNCAdjLQvWU7RY4RWVkV8QybdiAmqGb829UIE56Zir7sj7lvafx8v09VoSS9sU5XLHh6lvzBKmBokxtngaYIMxFAn0U3V4ZM23rZZsyKYwKM8nA7_ZVYMJ9AEqc8dowQUzE78mM8Rhr2klWIdISk5y/s1600/StockCake-Friendly-Call-Center_1723420268.webp"},
-            {n: "Carolina", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiqDDq9ZB6967dWethT8kzi04kdlhpZ7_fGE5kKn9ATOIKUVqU13aklhLkVnO_HiJwSyuxIOvp-DWHj1xbUKJzsewX0UDroC6eQ6JhYxkzlcXTxY1JATiTfMdLznAXrl8GEqvyCimGSGY9WGjRgEqIimkX2V120Yti0cqoJ8Fn7cn12j0C6hMIofPdtg95c/s1600/callCenter.jpg"},
-            {n: "Estefanía", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjdjwIeoO7YnjtpkXiXxFKUiSy8ssQGvsD85vXebU4buDEXgWV0_6LwQzXAO2172qBVamwBLKczRRWpP4MJOGFm6ImQ7WMVK0ghkQZNupB-__Upf3e0j2FInTxeGOs7cZfGgGnBH5WeQ0tVOQOfZrxXMJKpeT4bXz8VHjKEsWQ6MAQJspN43SU_fw54uo7N/s1600/telemarketing_002.jpg"},
-            {n: "Sofía", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjj8UIYW0ose63ONacNpqFaV35lkGDDm-PYj_kWP7D_RIoxFUAe2bLr0d9L3lB-I9LDYFl6TmyrRMu557lQXWM-DU329joWK73qKPeS9kUmmBbXv8hUhETNKVBZG7HHALhOs_8AIj9zKj8tr6UZl7FvF18jr-jCF-XSN-GuZGSR1YFtQuzBhKB068YXv3o8/s1600/que-es-una-diadema-inalambrica.jpg"}
+            {n: "Dayana", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4EJO6iV4Z-Itf2sYYwuqldfLYxibew0bjGGlCatlNCAdjLQvWU7RY4RWVkV8QybdiAmqGb829UIE56Zir7sj7lvafx8v09VoSS9sU5XLHh6lvzBKmBokxtngaYIMxFAn0U3V4ZM23rZZsyKYwKM8nA7_ZVYMJ9AEqc8dowQUzE78mM8Rhr2klWIdISk5y/s1600/StockCake-Friendly-Call-Center_1723420268.webp"}
         ];
 
         const r = equipo[Math.floor(Math.random() * equipo.length)];
@@ -42,17 +39,17 @@
         document.getElementById('v-nom').innerText = r.n;
 
         const chat = document.getElementById('chat');
-        chat.innerHTML = `<div class="m b">¡Hola! Soy <b>${r.n}</b>. Bienvenida a Creativita Shop. ¿En qué puedo ayudarte?</div>`;
+        chat.innerHTML = `<div class="m b">¡Hola! Soy <b>${r.n}</b>. ¿En qué puedo ayudarte hoy?</div>`;
 
         async function s() {
             const i = document.getElementById('t');
-            if(!i.value) return;
-            const v = i.value; i.value = '';
+            const v = i.value; if(!v) return;
+            i.value = '';
             chat.innerHTML += `<div class="m u">${v}</div>`;
             chat.scrollTop = chat.scrollHeight;
 
             try {
-                // AQUÍ USAMOS TU URL REAL DE CLOUDFLARE
+                // ESTA URL DEBE SER EXACTAMENTE LA DE TU CLOUDFLARE
                 const res = await fetch('https://tiny-cloud-4692.creativita-110.workers.dev/', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -63,6 +60,7 @@
                 chat.innerHTML += `<div class="m b">${rta}</div>`;
             } catch (e) {
                 chat.innerHTML += `<div class="m b">Danos un momento, estamos verificando disponibilidad.</div>`;
+                console.error(e);
             }
             chat.scrollTop = chat.scrollHeight;
         }
