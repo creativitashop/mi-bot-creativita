@@ -1,51 +1,35 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Chat Carolina</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 10px; background: #fff; }
-        #chat-box { height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; }
-        .msg { margin: 5px 0; padding: 8px 12px; border-radius: 15px; max-width: 80%; }
-        .user { background: #D4AF37; color: white; align-self: flex-end; }
-        .bot { background: #f1f1f1; color: #333; align-self: flex-start; }
-        #input-area { display: flex; gap: 5px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; }
-        button { background: #D4AF37; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px; background: #fff; }
+        #chat { height: 400px; overflow-y: auto; border: 1px solid #f0f0f0; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .m { padding: 8px 12px; border-radius: 15px; max-width: 80%; font-size: 14px; }
+        .u { background: #D4AF37; color: white; align-self: flex-end; }
+        .b { background: #f1f1f1; color: #333; align-self: flex-start; }
+        #in { display: flex; margin-top: 10px; gap: 5px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        button { background: #D4AF37; border: none; color: white; padding: 10px 15px; border-radius: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div id="chat-box"></div>
-    <div id="input-area">
-        <input type="text" id="user-input" placeholder="Escribe tu duda sobre RtaFull...">
-        <button onclick="sendMsg()">Enviar</button>
-    </div>
-
+    <div id="chat"></div>
+    <div id="in"><input type="text" id="t" placeholder="Pregúntame por RtaFull..."><button onclick="s()">Enviar</button></div>
     <script>
-        const WORKER_URL = 'https://mi-bot-creativita.creativitashopcoloficial.workers.dev/';
-
-        async function sendMsg() {
-            const input = document.getElementById('user-input');
-            const box = document.getElementById('chat-box');
-            if(!input.value) return;
-
-            const val = input.value;
-            box.innerHTML += `<div class="msg user">${val}</div>`;
-            input.value = '';
-
+        const URL = 'https://mi-bot-creativita.creativitashopcoloficial.workers.dev/';
+        async function s() {
+            const i = document.getElementById('t'), c = document.getElementById('chat');
+            if(!i.value) return;
+            const v = i.value; i.value = '';
+            c.innerHTML += `<div class="m u">${v}</div>`;
             try {
-                const res = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ mensaje: val })
-                });
-                const data = await res.json();
-                const rta = data.candidates[0].content.parts[0].text;
-                box.innerHTML += `<div class="msg bot">${rta}</div>`;
-            } catch (e) {
-                box.innerHTML += `<div class="msg bot">Carolina está descansando, intenta en un momento.</div>`;
-            }
-            box.scrollTop = box.scrollHeight;
+                const r = await fetch(URL, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ mensaje: v }) });
+                const d = await r.json();
+                const rta = d.candidates[0].content.parts[0].text;
+                c.innerHTML += `<div class="m b">${rta}</div>`;
+            } catch (e) { c.innerHTML += `<div class="m b">Danos un momento, Carolina está procesando pedidos.</div>`; }
+            c.scrollTop = c.scrollHeight;
         }
     </script>
 </body>
