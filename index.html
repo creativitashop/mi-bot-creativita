@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Creativita Shop</title>
     <style>
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: #fff; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #fff; overflow: hidden; }
         .header { background: #D4AF37; color: white; padding: 15px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .avatar-box { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #fff; overflow: hidden; background: #eee; flex-shrink: 0; }
         .avatar { width: 100%; height: 100%; object-fit: cover; }
         .info { display: flex; flex-direction: column; }
-        .name { font-weight: 600; font-size: 16px; }
-        .status { font-size: 11px; display: flex; align-items: center; gap: 4px; }
-        .status::before { content: ''; width: 8px; height: 8px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 5px #00ff00; }
+        .name { font-weight: 600; font-size: 15px; }
+        .cargo { font-size: 10px; text-transform: uppercase; opacity: 0.9; letter-spacing: 0.5px; }
+        .status { font-size: 10px; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+        .status::before { content: ''; width: 7px; height: 7px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 5px #00ff00; }
         #chat { height: 380px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #fdfdfd; scroll-behavior: smooth; }
-        .m { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .m { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 14px; line-height: 1.4; }
         .u { background: #D4AF37; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
         .b { background: #f1f1f1; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #e0e0e0; }
         #in { display: flex; padding: 10px; background: #fff; border-top: 1px solid #eee; gap: 8px; align-items: center; }
@@ -26,7 +26,8 @@
     <div class="header">
         <div class="avatar-box"><img id="v-img" class="avatar" src=""></div>
         <div class="info">
-            <span id="v-nom" class="name">Asesora</span>
+            <span id="v-nom" class="name">Cargando...</span>
+            <span id="v-cargo" class="cargo">Asesora</span>
             <span class="status">En línea ahora</span>
         </div>
     </div>
@@ -40,16 +41,20 @@
 
     <script>
         const equipo = [
-            {n: "Valentina", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp"},
-            {n: "Dayana", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4EJO6iV4Z-Itf2sYYwuqldfLYxibew0bjGGlCatlNCAdjLQvWU7RY4RWVkV8QybdiAmqGb829UIE56Zir7sj7lvafx8v09VoSS9sU5XLHh6lvzBKmBokxtngaYIMxFAn0U3V4ZM23rZZsyKYwKM8nA7_ZVYMJ9AEqc8dowQUzE78mM8Rhr2klWIdISk5y/s1600/StockCake-Friendly-Call-Center_1723420268.webp"}
+            {n: "Dayana", c: "Líder de Equipo", s: "¡Hola! Soy Dayana, Líder de Ventas. ¿Qué producto buscas hoy para darte prioridad?", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4EJO6iV4Z-Itf2sYYwuqldfLYxibew0bjGGlCatlNCAdjLQvWU7RY4RWVkV8QybdiAmqGb829UIE56Zir7sj7lvafx8v09VoSS9sU5XLHh6lvzBKmBokxtngaYIMxFAn0U3V4ZM23rZZsyKYwKM8nA7_ZVYMJ9AEqc8dowQUzE78mM8Rhr2klWIdISk5y/s1600/StockCake-Friendly-Call-Center_1723420268.webp"},
+            {n: "Valentina", c: "Asesora Especializada", s: "Hola, soy Valentina. Te ayudaré con los detalles técnicos de tu compra hoy.", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeWthUdXMC5y_NwxwBcLYnFHzGbWkGjTEKQWX2cv9oH7wiN4OcEKd0gE2B3Z6Y_Q-u21Jsndl3sHd3pn63aEFYg6SCk7pdDjXNI9gCWdwwnDjmct7iZQriFPSDtlijXEZpPIIEQyi5EgCrFwwZou0Ppj6Tq-hIayAgU6RsfxDIi85XKY7Ixmk8oMa_BrKd/s1600/ce7e99b2-agent--e1544463165980.webp"},
+            {n: "Ximena", c: "Asesora Senior", s: "¡Buen día! Soy Ximena. ¿En qué ciudad estás para validarte el envío gratis?", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiqDDq9ZB6967dWethT8kzi04kdlhpZ7_fGE5kKn9ATOIKUVqU13aklhLkVnO_HiJwSyuxIOvp-DWHj1xbUKJzsewX0UDroC6eQ6JhYxkzlcXTxY1JATiTfMdLznAXrl8GEqvyCimGSGY9WGjRgEqIimkX2V120Yti0cqoJ8Fn7cn12j0C6hMIofPdtg95c/s1600/callCenter.jpg"},
+            {n: "Carolina", c: "Asesora Senior", s: "Hola, soy Carolina. Estoy lista para agendar tu pedido con pago contra entrega.", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjdjwIeoO7YnjtpkXiXxFKUiSy8ssQGvsD85vXebU4buDEXgWV0_6LwQzXAO2172qBVamwBLKczRRWpP4MJOGFm6ImQ7WMVK0ghkQZNupB-__Upf3e0j2FInTxeGOs7cZfGgGnBH5WeQ0tVOQOfZrxXMJKpeT4bXz8VHjKEsWQ6MAQJspN43SU_fw54uo7N/s1600/telemarketing_002.jpg"},
+            {n: "Estefanía", c: "Asesora Senior", s: "¡Hola! Soy Estefanía. Cuéntame qué producto te interesa y coordinamos el envío.", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjj8UIYW0ose63ONacNpqFaV35lkGDDm-PYj_kWP7D_RIoxFUAe2bLr0d9L3lB-I9LDYFl6TmyrRMu557lQXWM-DU329joWK73qKPeS9kUmmBbXv8hUhETNKVBZG7HHALhOs_8AIj9zKj8tr6UZl7FvF18jr-jCF-XSN-GuZGSR1YFtQuzBhKB068YXv3o8/s1600/que-es-una-diadema-inalambrica.jpg"}
         ];
 
         const r = equipo[Math.floor(Math.random() * equipo.length)];
         document.getElementById('v-img').src = r.f;
         document.getElementById('v-nom').innerText = r.n;
+        document.getElementById('v-cargo').innerText = r.c;
 
         const chat = document.getElementById('chat');
-        chat.innerHTML = `<div class="m b">¡Hola! Soy ${r.n} de Creativita Shop. ¿En qué ciudad estás para confirmarte el envío gratis y pago contra entrega?</div>`;
+        chat.innerHTML = `<div class="m b">${r.s}</div>`;
 
         async function s() {
             const i = document.getElementById('t');
@@ -59,16 +64,15 @@
             chat.scrollTop = chat.scrollHeight;
 
             try {
-                // TU URL REAL DE CLOUDFLARE
                 const res = await fetch('https://tiny-cloud-4692.creativita-110.workers.dev/', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ mensaje: v })
                 });
                 const d = await res.json();
-                chat.innerHTML += `<div class="m b">${d.respuesta || "Déjanos tu WhatsApp para ayudarte."}</div>`;
+                chat.innerHTML += `<div class="m b">${d.respuesta || "Por favor, déjanos tu WhatsApp para ayudarte."}</div>`;
             } catch (e) {
-                chat.innerHTML += `<div class="m b">Danos un momento... o déjanos tu WhatsApp.</div>`;
+                chat.innerHTML += `<div class="m b">Danos un momento, estamos verificando stock...</div>`;
             }
             chat.scrollTop = chat.scrollHeight;
         }
