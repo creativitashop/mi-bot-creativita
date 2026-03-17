@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat de Ventas - Creativita Shop</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: #fff; overflow: hidden; }
         .header { background: #D4AF37; color: white; padding: 15px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -48,6 +49,7 @@
             {n: "Estefanía", c: "Asesora Senior", s: "¡Hola! Soy Estefanía. Cuéntame qué producto te interesa y coordinamos el envío.", f: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjj8UIYW0ose63ONacNpqFaV35lkGDDm-PYj_kWP7D_RIoxFUAe2bLr0d9L3lB-I9LDYFl6TmyrRMu557lQXWM-DU329joWK73qKPeS9kUmmBbXv8hUhETNKVBZG7HHALhOs_8AIj9zKj8tr6UZl7FvF18jr-jCF-XSN-GuZGSR1YFtQuzBhKB068YXv3o8/s1600/que-es-una-diadema-inalambrica.jpg"}
         ];
 
+        // Selección aleatoria de asesora
         const r = equipo[Math.floor(Math.random() * equipo.length)];
         document.getElementById('v-img').src = r.f;
         document.getElementById('v-nom').innerText = r.n;
@@ -59,18 +61,33 @@
         async function s() {
             const i = document.getElementById('t');
             if(!i.value.trim()) return;
-            const v = i.value; i.value = '';
+            
+            const v = i.value; 
+            i.value = '';
+            
+            // Mostrar mensaje del usuario
             chat.innerHTML += `<div class="m u">${v}</div>`;
             chat.scrollTop = chat.scrollHeight;
 
+            const nombreAsesora = document.getElementById('v-nom').innerText;
+
             try {
+                // Fetch al Worker de Cloudflare
                 const res = await fetch('https://tiny-cloud-4692.creativita-110.workers.dev/', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ mensaje: v })
+                    body: JSON.stringify({ 
+                        message: v, // Enviamos como 'message'
+                        asesora: nombreAsesora 
+                    })
                 });
+                
                 const d = await res.json();
-                chat.innerHTML += `<div class="m b">${d.respuesta || "Por favor, déjanos tu WhatsApp para ayudarte."}</div>`;
+                
+                // Extraer respuesta (soporta ambos nombres de variable por seguridad)
+                const textoFinal = d.response || d.respuesta || "Estoy procesando tu solicitud, un momento...";
+                
+                chat.innerHTML += `<div class="m b">${textoFinal}</div>`;
             } catch (e) {
                 chat.innerHTML += `<div class="m b">Danos un momento, estamos verificando stock...</div>`;
             }
